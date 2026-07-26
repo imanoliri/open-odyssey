@@ -60,6 +60,38 @@ func _run() -> void:
 			quit(1)
 			return
 
+	var audio := aircraft.get_node_or_null(
+		"AudioController"
+	) as AircraftAudioController
+	if audio == null:
+		push_error("Smoke test could not find AudioController.")
+		quit(1)
+		return
+
+	if (
+		audio.engine_amplitude_for_throttle(1.0)
+		<= audio.engine_amplitude_for_throttle(0.25)
+	):
+		push_error("Engine sound is not proportional to throttle.")
+		quit(1)
+		return
+
+	if (
+		audio.engine_frequency_for_throttle(1.0)
+		<= audio.engine_frequency_for_throttle(0.25)
+	):
+		push_error("Propeller frequency is not proportional to throttle.")
+		quit(1)
+		return
+
+	if (
+		audio.wind_amplitude_for_speed(60.0)
+		<= audio.wind_amplitude_for_speed(15.0)
+	):
+		push_error("Wind sound is not proportional to airspeed.")
+		quit(1)
+		return
+
 	var camera_rig := scene.get_node_or_null("CameraRig") as Node3D
 	if camera_rig == null:
 		push_error("Smoke test could not find CameraRig.")
@@ -120,7 +152,17 @@ func _run() -> void:
 		quit(1)
 		return
 
+	if (
+		audio.current_engine_amplitude <= 0.0
+		or audio.current_wind_amplitude <= 0.0
+	):
+		push_error("Aircraft audio levels did not respond during simulation.")
+		quit(1)
+		return
+
 	print(
-		"SMOKE PASS: propulsion advanced and camera followed with fixed rotation."
+		"SMOKE PASS: propulsion, fixed camera, engine audio, and wind audio advanced."
 	)
+	scene.queue_free()
+	await process_frame
 	quit(0)
