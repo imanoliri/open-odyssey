@@ -114,6 +114,11 @@ func _run() -> void:
 		quit(1)
 		return
 
+	if audio.wind_whistle_mix > 0.10:
+		push_error("Wind whistle is not mixed as a background element.")
+		quit(1)
+		return
+
 	var camera_rig := scene.get_node_or_null("CameraRig") as Node3D
 	if camera_rig == null:
 		push_error("Smoke test could not find CameraRig.")

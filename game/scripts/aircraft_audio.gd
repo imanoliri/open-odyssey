@@ -11,7 +11,7 @@ extends Node3D
 @export var wind_max_amplitude := 0.34
 @export var wind_whistle_min_frequency_hz := 420.0
 @export var wind_whistle_max_frequency_hz := 1500.0
-@export var wind_whistle_mix := 0.22
+@export var wind_whistle_mix := 0.08
 @export var level_smoothing := 5.0
 
 @onready var engine_player: AudioStreamPlayer3D = $Engine
@@ -21,7 +21,8 @@ var aircraft: PrototypeAircraft
 var engine_playback: AudioStreamGeneratorPlayback
 var wind_playback: AudioStreamGeneratorPlayback
 var engine_phase := 0.0
-var wind_low_pass_sample := 0.0
+var wind_fast_filtered_sample := 0.0
+var wind_slow_filtered_sample := 0.0
 var wind_whistle_phase := 0.0
 var wind_whistle_secondary_phase := 0.0
 var wind_wander_phase := 0.0
@@ -160,12 +161,20 @@ func _fill_wind_buffer() -> void:
 
 	for frame in wind_playback.get_frames_available():
 		var raw_noise := randf_range(-1.0, 1.0)
-		wind_low_pass_sample = lerpf(
-			wind_low_pass_sample,
+		wind_fast_filtered_sample = lerpf(
+			wind_fast_filtered_sample,
 			raw_noise,
-			0.075
+			0.30
 		)
-		var bright_air_noise := raw_noise - wind_low_pass_sample
+		wind_slow_filtered_sample = lerpf(
+			wind_slow_filtered_sample,
+			raw_noise,
+			0.025
+		)
+		var clean_air_noise := (
+			wind_fast_filtered_sample
+			- wind_slow_filtered_sample
+		) * 1.35
 
 		wind_whistle_phase = fmod(
 			wind_whistle_phase
@@ -191,7 +200,7 @@ func _fill_wind_buffer() -> void:
 			+ 0.32 * sin(wind_whistle_secondary_phase)
 		) / 1.32
 		var sample := (
-			bright_air_noise * 0.62
+			clean_air_noise * 0.70
 			+ whistle * wind_whistle_mix * whistle_envelope
 		) * current_wind_amplitude
 		wind_playback.push_frame(Vector2(sample, sample))
