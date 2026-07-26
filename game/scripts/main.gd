@@ -16,8 +16,8 @@ func _enter_tree() -> void:
 	# Pulling the left stick down pitches up, matching aircraft controls.
 	_add_joy_axis_action("pitch_up", JOY_AXIS_LEFT_Y, 1.0)
 	_add_joy_axis_action("pitch_down", JOY_AXIS_LEFT_Y, -1.0)
-	_add_joy_axis_action("roll_left", JOY_AXIS_LEFT_X, -1.0)
-	_add_joy_axis_action("roll_right", JOY_AXIS_LEFT_X, 1.0)
+	_add_joy_axis_action("roll_left", JOY_AXIS_LEFT_X, 1.0)
+	_add_joy_axis_action("roll_right", JOY_AXIS_LEFT_X, -1.0)
 	_add_joy_axis_action("yaw_left", JOY_AXIS_RIGHT_X, -1.0)
 	_add_joy_axis_action("yaw_right", JOY_AXIS_RIGHT_X, 1.0)
 	_add_joy_button_action("throttle_down", JOY_BUTTON_LEFT_SHOULDER)
