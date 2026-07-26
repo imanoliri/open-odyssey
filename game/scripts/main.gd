@@ -26,7 +26,6 @@ func _enter_tree() -> void:
 	_add_joy_axis_action("yaw_left", JOY_AXIS_TRIGGER_RIGHT, 1.0)
 	_add_joy_button_action("throttle_down", JOY_BUTTON_LEFT_SHOULDER)
 	_add_joy_button_action("throttle_up", JOY_BUTTON_RIGHT_SHOULDER)
-	_add_joy_button_action("restart", JOY_BUTTON_START)
 
 
 func _unhandled_input(event: InputEvent) -> void:

@@ -16,6 +16,78 @@ func _run() -> void:
 	root.add_child(scene)
 	await process_frame
 
+	var configuration_menu := scene.get_node_or_null(
+		"ConfigurationMenu"
+	) as FlightConfigurationMenu
+	if configuration_menu == null:
+		push_error("Smoke test could not find the flight configuration menu.")
+		quit(1)
+		return
+	if (
+		configuration_menu.selected_aircraft_label() != "test-airplane"
+		or configuration_menu.selected_map_label() != "test-playground"
+	):
+		push_error("Default flight configuration labels changed.")
+		quit(1)
+		return
+	for restart_event in InputMap.action_get_events("restart"):
+		if (
+			restart_event is InputEventJoypadButton
+			and restart_event.button_index == JOY_BUTTON_START
+		):
+			push_error("Start is still bound directly to restart.")
+			quit(1)
+			return
+
+	var open_menu_event := InputEventKey.new()
+	open_menu_event.physical_keycode = KEY_TAB
+	open_menu_event.pressed = true
+	configuration_menu._unhandled_input(open_menu_event)
+	if not paused:
+		push_error("Configuration menu did not pause flight.")
+		quit(1)
+		return
+	var cross_event := InputEventJoypadButton.new()
+	cross_event.button_index = JOY_BUTTON_A
+	cross_event.pressed = true
+	configuration_menu._input(cross_event)
+	var aircraft_selector: OptionButton = configuration_menu.get(
+		"_aircraft_selector"
+	)
+	if not aircraft_selector.get_popup().visible:
+		push_error("Cross did not open the focused aircraft selector.")
+		quit(1)
+		return
+	configuration_menu._on_selector_popup_input(
+		cross_event,
+		aircraft_selector
+	)
+	if aircraft_selector.get_popup().visible:
+		push_error("Cross did not confirm the highlighted aircraft option.")
+		quit(1)
+		return
+	configuration_menu._input(cross_event)
+	if not aircraft_selector.get_popup().visible:
+		push_error("Cross did not reopen the aircraft selector.")
+		quit(1)
+		return
+	var triangle_event := InputEventJoypadButton.new()
+	triangle_event.button_index = JOY_BUTTON_Y
+	triangle_event.pressed = true
+	configuration_menu._on_selector_popup_input(
+		triangle_event,
+		aircraft_selector
+	)
+	if not paused or aircraft_selector.get_popup().visible:
+		push_error("Triangle did not back out of the aircraft selector.")
+		quit(1)
+		return
+	configuration_menu._input(triangle_event)
+	if paused:
+		push_error("Triangle did not close the configuration menu.")
+		quit(1)
+		return
+
 	var aircraft := scene.get_node_or_null("PlayerAircraft") as PrototypeAircraft
 	if aircraft == null:
 		push_error("Smoke test could not find PlayerAircraft.")

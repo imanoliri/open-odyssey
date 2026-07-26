@@ -35,6 +35,7 @@ From PowerShell:
 | Yaw | Q / E or Left / Right Arrow |
 | Throttle | R / F |
 | Restart | Enter |
+| Select aircraft and map | Tab |
 
 Hold `R` to increase throttle. Near 30 m/s, use `W` gently to pitch upward.
 
@@ -47,7 +48,16 @@ The prototype uses Godot's standard gamepad layout:
 | Pitch and roll | Left analog stick |
 | Yaw | Right stick horizontal; L2 right / R2 left |
 | Throttle down/up | L1 / R1 |
-| Restart | Start |
+| Open/launch configuration | Start |
+| Select / confirm | Cross |
+| Back / deselect | Triangle |
+
+The configuration menu pauses flight. Use the D-pad and Cross to choose an
+aircraft and map, then press Start to launch the current selection. You can also
+highlight **Play / Restart** and press Cross. Triangle closes a list, restores
+an unsaved choice, or moves back. The built-in configuration is `test-airplane`
+on `test-playground`; ignored local experiments can add options without being
+required by a clean checkout.
 
 Pull the left stick down to pitch upward. The HUD displays the controller name
 that Godot detects. Some unbranded PS2-to-USB adapters expose nonstandard button

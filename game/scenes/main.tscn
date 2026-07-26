@@ -1,10 +1,11 @@
-[gd_scene load_steps=20 format=3]
+[gd_scene load_steps=21 format=3]
 
 [ext_resource type="Script" path="res://scripts/main.gd" id="1_main"]
 [ext_resource type="Script" path="res://scripts/aircraft.gd" id="2_aircraft"]
 [ext_resource type="Script" path="res://scripts/camera_rig.gd" id="3_camera"]
 [ext_resource type="Script" path="res://scripts/hud.gd" id="4_hud"]
 [ext_resource type="Script" path="res://scripts/aircraft_audio.gd" id="5_audio"]
+[ext_resource type="Script" path="res://scripts/configuration_menu.gd" id="6_configuration"]
 
 [sub_resource type="Environment" id="Environment_world"]
 background_mode = 1
@@ -75,6 +76,9 @@ corner_radius_bottom_left = 6
 
 [node name="FlightTest" type="Node3D"]
 script = ExtResource("1_main")
+
+[node name="ConfigurationMenu" type="CanvasLayer" parent="."]
+script = ExtResource("6_configuration")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_world")
@@ -198,4 +202,4 @@ theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
 theme_override_constants/shadow_offset_x = 2
 theme_override_constants/shadow_offset_y = 2
 theme_override_font_sizes/font_size = 16
-text = "Keyboard: W/S pitch  A/D roll  Q/E or arrows yaw  R/F throttle  Enter restart\nGamepad: left stick pitch/roll  right stick yaw  L2 right/R2 left yaw  L1/R1 throttle  Start restart"
+text = "Keyboard: W/S pitch  A/D roll  Q/E or arrows yaw  R/F throttle  Enter restart  Tab configure\nGamepad: left stick pitch/roll  right stick yaw  L2 right/R2 left yaw  L1/R1 throttle  Start open/launch  Cross select  Triangle back"
