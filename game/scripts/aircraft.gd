@@ -17,7 +17,7 @@ extends RigidBody3D
 
 @export_category("Control torque")
 @export var pitch_torque_newton_metres := 9500.0
-@export var roll_torque_newton_metres := 6250.0
+@export var roll_torque_newton_metres := 4375.0
 @export var yaw_torque_newton_metres := 4500.0
 
 var throttle := 0.0

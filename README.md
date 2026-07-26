@@ -45,7 +45,7 @@ The prototype uses Godot's standard gamepad layout:
 | Control | PS2-style controller |
 |---|---|
 | Pitch and roll | Left analog stick |
-| Yaw | Right analog stick, horizontal, or L2 / R2 |
+| Yaw | Right stick horizontal; L2 right / R2 left |
 | Throttle down/up | L1 / R1 |
 | Restart | Start |
 
