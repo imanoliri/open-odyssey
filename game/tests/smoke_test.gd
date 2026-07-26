@@ -24,24 +24,34 @@ func _run() -> void:
 
 	var physics_text := aircraft.physical_characteristics_text()
 	for required_text in [
-		"[ENGINE]",
-		"[AERODYNAMICS]",
-		"[CONTROL AUTHORITY]",
-		"[PHYSICAL]",
-		"[ROTATIONAL STATE]",
 		"MAX THRUST",
 		"ROLL TORQUE",
 		"YAW TORQUE",
 		"BOX W x H x L",
 		"2.00 x 0.80 x 5.40 m",
 		"INERTIA P/Y/R",
-		"2359.17 / 2625.17 /  367.33",
-		"RATE P/Y/R",
-		"MOMENTUM P/Y/R"
+		"2359.17 / 2625.17 /  367.33"
 	]:
 		if not physics_text.contains(required_text):
 			push_error(
 				"Aircraft physics panel is missing: %s" % required_text
+			)
+			quit(1)
+			return
+
+	for removed_text in [
+		"AIRCRAFT PHYSICS",
+		"[ENGINE]",
+		"STARTING THROTTLE",
+		"AIR DENSITY",
+		"GRAVITY SCALE",
+		"ROTATIONAL STATE",
+		"RATE P/Y/R",
+		"MOMENTUM P/Y/R"
+	]:
+		if physics_text.contains(removed_text):
+			push_error(
+				"Aircraft physics panel still contains: %s" % removed_text
 			)
 			quit(1)
 			return
