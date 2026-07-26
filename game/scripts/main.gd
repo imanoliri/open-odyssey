@@ -1,6 +1,20 @@
 extends Node3D
 
 
+func set_test_environment_enabled(enabled: bool) -> void:
+	var ground := get_node_or_null("Ground") as StaticBody3D
+	var runway := get_node_or_null("Runway") as MeshInstance3D
+	if ground != null:
+		ground.visible = enabled
+		var collision := ground.get_node_or_null(
+			"CollisionShape3D"
+		) as CollisionShape3D
+		if collision != null:
+			collision.disabled = not enabled
+	if runway != null:
+		runway.visible = enabled
+
+
 func _enter_tree() -> void:
 	_add_key_action("pitch_up", KEY_W)
 	_add_key_action("pitch_down", KEY_S)

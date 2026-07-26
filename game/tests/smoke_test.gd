@@ -30,6 +30,28 @@ func _run() -> void:
 		push_error("Default flight configuration labels changed.")
 		quit(1)
 		return
+	var ground := scene.get_node_or_null("Ground") as StaticBody3D
+	var runway := scene.get_node_or_null("Runway") as MeshInstance3D
+	var ground_collision := scene.get_node_or_null(
+		"Ground/CollisionShape3D"
+	) as CollisionShape3D
+	if (
+		ground == null
+		or runway == null
+		or ground_collision == null
+		or not ground.visible
+		or not runway.visible
+		or ground_collision.disabled
+	):
+		push_error("Testing grounds did not retain its floor and runway.")
+		quit(1)
+		return
+	scene.set_test_environment_enabled(false)
+	if ground.visible or runway.visible or not ground_collision.disabled:
+		push_error("Generated-map environment retained testing-ground nodes.")
+		quit(1)
+		return
+	scene.set_test_environment_enabled(true)
 	if (
 		configuration_menu.aircraft_family_display_name("bf-109")
 		!= "Bf-109"

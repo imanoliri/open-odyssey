@@ -582,17 +582,21 @@ func _apply_remembered_configuration() -> void:
 		_remembered_map_id,
 		DEFAULT_MAP_ID
 	)
-	_instantiate_component(
-		_configuration_for_id(
-			_aircraft_configurations,
-			_remembered_aircraft_id
-		),
-		"AircraftConfiguration"
+	var aircraft_configuration := _configuration_for_id(
+		_aircraft_configurations,
+		_remembered_aircraft_id
 	)
-	_instantiate_component(
-		_configuration_for_id(_map_configurations, _remembered_map_id),
-		"MapConfiguration"
+	var map_configuration := _configuration_for_id(
+		_map_configurations,
+		_remembered_map_id
 	)
+	_instantiate_component(aircraft_configuration, "AircraftConfiguration")
+	var flight_test := get_parent()
+	if flight_test.has_method("set_test_environment_enabled"):
+		flight_test.set_test_environment_enabled(
+			(map_configuration["component_scene"] as String).is_empty()
+		)
+	_instantiate_component(map_configuration, "MapConfiguration")
 	_update_current_configuration_label()
 
 
