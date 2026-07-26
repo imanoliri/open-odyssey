@@ -1,0 +1,16 @@
+# Never commit original game or emulator firmware content.
+*.iso
+*.bin
+*.cue
+*.chd
+*.elf
+*.irx
+*.ps2
+*.pnach
+BIOS/
+disc-dump/
+extracted/
+raw-captures/
+save-states/
+memory-dumps/
+disassembly/

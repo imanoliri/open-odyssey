@@ -1,0 +1,25 @@
+.godot/
+.import/
+export/
+build/
+*.tmp
+*.log
+.DS_Store
+Thumbs.db
+
+# Never commit original game or emulator firmware content.
+*.iso
+*.cue
+*.chd
+*.elf
+*.irx
+*.ps2
+*.pnach
+BIOS/
+disc-dump/
+extracted/
+raw-captures/
+save-states/
+memory-dumps/
+disassembly/
+research/private-original-material/
