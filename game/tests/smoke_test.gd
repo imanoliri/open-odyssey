@@ -25,12 +25,16 @@ func _run() -> void:
 	var physics_text := aircraft.physical_characteristics_text()
 	for required_text in [
 		"MAX THRUST",
+		"THRUST / WEIGHT",
 		"ROLL TORQUE",
 		"YAW TORQUE",
 		"BOX W x H x L",
 		"2.00 x 0.80 x 5.40 m",
 		"INERTIA P/Y/R",
-		"2359.17 / 2625.17 /  367.33"
+		"2359.17 / 2625.17 /  367.33",
+		"PITCH RATE",
+		"YAW RATE",
+		"ROLL RATE"
 	]:
 		if not physics_text.contains(required_text):
 			push_error(

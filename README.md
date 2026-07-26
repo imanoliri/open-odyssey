@@ -79,4 +79,5 @@ production.
 The upper-right HUD panel reads its values directly from the aircraft. Blank
 lines separate engine, aerodynamics, control-authority, and physical values
 without section titles. Physical values include box-derived pitch/yaw/roll
-moments of inertia.
+moments of inertia. The panel also shows maximum thrust-to-weight ratio and live
+local pitch, yaw, and roll rates in degrees per second.

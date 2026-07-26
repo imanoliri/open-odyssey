@@ -173,7 +173,7 @@ unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.83, 0.96, 1, 1)
 theme_override_font_sizes/font_size = 13
-text = "MAX THRUST\nTHROTTLE RATE\n\nWING AREA\nLIFT COEFF\nDRAG COEFF\n\nPITCH TORQUE\nROLL TORQUE\nYAW TORQUE\n\nMASS\nBOX W x H x L\nINERTIA P/Y/R"
+text = "MAX THRUST\nTHROTTLE RATE\nTHRUST / WEIGHT\n\nWING AREA\nLIFT COEFF\nDRAG COEFF\n\nPITCH TORQUE\nROLL TORQUE\nYAW TORQUE\n\nMASS\nBOX W x H x L\nINERTIA P/Y/R\nPITCH RATE\nYAW RATE\nROLL RATE"
 
 [node name="Instructions" type="Label" parent="HUD"]
 layout_mode = 0

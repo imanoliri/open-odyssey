@@ -107,6 +107,17 @@ func telemetry_text() -> String:
 func physical_characteristics_text() -> String:
 	var box_size := _collision_box_size()
 	var moments_of_inertia := _box_moments_of_inertia(box_size)
+	var weight_newtons := maxf(mass * 9.80665 * gravity_scale, 0.001)
+	var thrust_to_weight_ratio := maximum_thrust_newtons / weight_newtons
+	var local_angular_velocity := (
+		global_transform.basis.orthonormalized().inverse()
+		* angular_velocity
+	)
+	var rotation_rates_degrees := Vector3(
+		rad_to_deg(local_angular_velocity.x),
+		rad_to_deg(local_angular_velocity.y),
+		rad_to_deg(local_angular_velocity.z)
+	)
 	var surface_friction := 0.0
 	var surface_bounce := 0.0
 	if physics_material_override != null:
@@ -116,6 +127,7 @@ func physical_characteristics_text() -> String:
 	var template := (
 		"MAX THRUST          %8.0f N\n"
 		+ "THROTTLE RATE       %8.2f /s\n"
+		+ "THRUST / WEIGHT     %8.3f\n"
 		+ "\n"
 		+ "WING AREA           %8.2f m^2\n"
 		+ "LIFT COEFF          %8.3f\n"
@@ -133,11 +145,15 @@ func physical_characteristics_text() -> String:
 		+ "ANGULAR DAMP        %8.3f\n"
 		+ "BOX W x H x L  %4.2f x %4.2f x %4.2f m\n"
 		+ "FRICTION / BOUNCE %6.2f / %6.2f\n"
-		+ "INERTIA P/Y/R %7.2f / %7.2f / %7.2f kg*m^2"
+		+ "INERTIA P/Y/R %7.2f / %7.2f / %7.2f kg*m^2\n"
+		+ "PITCH RATE          %8.2f deg/s\n"
+		+ "YAW RATE            %8.2f deg/s\n"
+		+ "ROLL RATE           %8.2f deg/s"
 	)
 	return template % [
 			maximum_thrust_newtons,
 			throttle_change_per_second,
+			thrust_to_weight_ratio,
 			wing_area_square_metres,
 			lift_coefficient,
 			drag_coefficient,
@@ -157,7 +173,10 @@ func physical_characteristics_text() -> String:
 			surface_bounce,
 			moments_of_inertia.x,
 			moments_of_inertia.y,
-			moments_of_inertia.z
+			moments_of_inertia.z,
+			rotation_rates_degrees.x,
+			rotation_rates_degrees.y,
+			rotation_rates_degrees.z
 		]
 
 
