@@ -76,6 +76,7 @@ The initial scene intentionally uses primitive geometry. It tests physics,
 camera, ground interaction, controls, telemetry, and restart behavior before art
 production.
 
-The upper-right HUD panel reads its values directly from the aircraft and shows
-mass, engine thrust, throttle response, aerodynamic coefficients, control
-torques, damping, gravity, collision-box dimensions, friction, and bounce.
+The upper-right HUD panel reads its values directly from the aircraft and
+separates them into engine, aerodynamics, control authority, physical, and live
+rotational-state sections. It includes box-derived pitch/yaw/roll moments of
+inertia, local angular rates, and angular momentum.

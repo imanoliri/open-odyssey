@@ -24,11 +24,20 @@ func _run() -> void:
 
 	var physics_text := aircraft.physical_characteristics_text()
 	for required_text in [
+		"[ENGINE]",
+		"[AERODYNAMICS]",
+		"[CONTROL AUTHORITY]",
+		"[PHYSICAL]",
+		"[ROTATIONAL STATE]",
 		"MAX THRUST",
 		"ROLL TORQUE",
 		"YAW TORQUE",
-		"BOX W×H×L",
-		"2.00 × 0.80 × 5.40 m"
+		"BOX W x H x L",
+		"2.00 x 0.80 x 5.40 m",
+		"INERTIA P/Y/R",
+		"2359.17 / 2625.17 /  367.33",
+		"RATE P/Y/R",
+		"MOMENTUM P/Y/R"
 	]:
 		if not physics_text.contains(required_text):
 			push_error(

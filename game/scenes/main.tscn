@@ -161,10 +161,10 @@ text = "AIRSPEED\nALTITUDE\nTHROTTLE\nSTATE\nCONTROLLER"
 layout_mode = 0
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -430.0
+offset_left = -470.0
 offset_top = 24.0
 offset_right = -24.0
-offset_bottom = 390.0
+offset_bottom = 605.0
 grow_horizontal = 0
 theme_override_styles/panel = SubResource("Style_hud")
 
@@ -172,8 +172,8 @@ theme_override_styles/panel = SubResource("Style_hud")
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.83, 0.96, 1, 1)
-theme_override_font_sizes/font_size = 15
-text = "AIRCRAFT PHYSICS\nMASS\nMAX THRUST\nROLL TORQUE\nYAW TORQUE\nBOX W×H×L"
+theme_override_font_sizes/font_size = 13
+text = "AIRCRAFT PHYSICS\n\n[ENGINE]\nMAX THRUST\n\n[AERODYNAMICS]\nLIFT COEFF\n\n[CONTROL AUTHORITY]\nROLL TORQUE\n\n[PHYSICAL]\nMASS\nINERTIA P/Y/R\n\n[ROTATIONAL STATE]\nRATE P/Y/R\nMOMENTUM P/Y/R"
 
 [node name="Instructions" type="Label" parent="HUD"]
 layout_mode = 0

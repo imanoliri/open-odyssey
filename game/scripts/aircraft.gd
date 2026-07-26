@@ -106,6 +106,21 @@ func telemetry_text() -> String:
 
 func physical_characteristics_text() -> String:
 	var box_size := _collision_box_size()
+	var moments_of_inertia := _box_moments_of_inertia(box_size)
+	var local_angular_velocity := (
+		global_transform.basis.orthonormalized().inverse()
+		* angular_velocity
+	)
+	var angular_rates_degrees := Vector3(
+		rad_to_deg(local_angular_velocity.x),
+		rad_to_deg(local_angular_velocity.y),
+		rad_to_deg(local_angular_velocity.z)
+	)
+	var angular_momentum := Vector3(
+		moments_of_inertia.x * local_angular_velocity.x,
+		moments_of_inertia.y * local_angular_velocity.y,
+		moments_of_inertia.z * local_angular_velocity.z
+	)
 	var surface_friction := 0.0
 	var surface_bounce := 0.0
 	if physics_material_override != null:
@@ -114,29 +129,38 @@ func physical_characteristics_text() -> String:
 
 	var template := (
 		"AIRCRAFT PHYSICS\n"
-		+ "MASS             %7.1f kg\n"
-		+ "MAX THRUST       %7.0f N\n"
-		+ "THROTTLE RATE    %7.2f /s\n"
-		+ "AIR DENSITY      %7.3f kg/m³\n"
-		+ "WING AREA        %7.2f m²\n"
-		+ "LIFT COEFF       %7.3f\n"
-		+ "DRAG COEFF       %7.3f\n"
-		+ "LATERAL DRAG     %7.3f\n"
-		+ "STALL SPEED      %7.2f m/s\n"
-		+ "FULL CONTROL     %7.2f m/s\n"
-		+ "PITCH TORQUE     %7.0f N·m\n"
-		+ "ROLL TORQUE      %7.0f N·m\n"
-		+ "YAW TORQUE       %7.0f N·m\n"
-		+ "LINEAR DAMP      %7.3f\n"
-		+ "ANGULAR DAMP     %7.3f\n"
-		+ "GRAVITY SCALE    %7.3f\n"
-		+ "BOX W×H×L       %4.2f × %4.2f × %4.2f m\n"
-		+ "FRICTION/BOUNCE %5.2f / %5.2f"
+		+ "\n[ENGINE]\n"
+		+ "MAX THRUST          %8.0f N\n"
+		+ "THROTTLE RATE       %8.2f /s\n"
+		+ "STARTING THROTTLE   %8.1f %%\n"
+		+ "\n[AERODYNAMICS]\n"
+		+ "AIR DENSITY         %8.3f kg/m^3\n"
+		+ "WING AREA           %8.2f m^2\n"
+		+ "LIFT COEFF          %8.3f\n"
+		+ "DRAG COEFF          %8.3f\n"
+		+ "LATERAL DRAG        %8.3f\n"
+		+ "STALL SPEED         %8.2f m/s\n"
+		+ "FULL CONTROL        %8.2f m/s\n"
+		+ "\n[CONTROL AUTHORITY]\n"
+		+ "PITCH TORQUE        %8.0f N*m\n"
+		+ "ROLL TORQUE         %8.0f N*m\n"
+		+ "YAW TORQUE          %8.0f N*m\n"
+		+ "\n[PHYSICAL]\n"
+		+ "MASS                %8.1f kg\n"
+		+ "GRAVITY SCALE       %8.3f\n"
+		+ "LINEAR DAMP         %8.3f\n"
+		+ "ANGULAR DAMP        %8.3f\n"
+		+ "BOX W x H x L  %4.2f x %4.2f x %4.2f m\n"
+		+ "FRICTION / BOUNCE %6.2f / %6.2f\n"
+		+ "INERTIA P/Y/R %7.2f / %7.2f / %7.2f kg*m^2\n"
+		+ "\n[ROTATIONAL STATE]\n"
+		+ "RATE P/Y/R    %7.2f / %7.2f / %7.2f deg/s\n"
+		+ "MOMENTUM P/Y/R %6.2f / %6.2f / %6.2f kg*m^2/s"
 	)
 	return template % [
-			mass,
 			maximum_thrust_newtons,
 			throttle_change_per_second,
+			starting_throttle * 100.0,
 			air_density,
 			wing_area_square_metres,
 			lift_coefficient,
@@ -147,14 +171,24 @@ func physical_characteristics_text() -> String:
 			pitch_torque_newton_metres,
 			roll_torque_newton_metres,
 			yaw_torque_newton_metres,
+			mass,
+			gravity_scale,
 			linear_damp,
 			angular_damp,
-			gravity_scale,
 			box_size.x,
 			box_size.y,
 			box_size.z,
 			surface_friction,
-			surface_bounce
+			surface_bounce,
+			moments_of_inertia.x,
+			moments_of_inertia.y,
+			moments_of_inertia.z,
+			angular_rates_degrees.x,
+			angular_rates_degrees.y,
+			angular_rates_degrees.z,
+			angular_momentum.x,
+			angular_momentum.y,
+			angular_momentum.z
 		]
 
 
@@ -166,3 +200,14 @@ func _collision_box_size() -> Vector3:
 	if box == null:
 		return Vector3.ZERO
 	return box.size
+
+
+func _box_moments_of_inertia(box_size: Vector3) -> Vector3:
+	var width_squared := box_size.x * box_size.x
+	var height_squared := box_size.y * box_size.y
+	var length_squared := box_size.z * box_size.z
+	return Vector3(
+		mass * (height_squared + length_squared) / 12.0,
+		mass * (width_squared + length_squared) / 12.0,
+		mass * (width_squared + height_squared) / 12.0
+	)
