@@ -2,6 +2,7 @@ class_name FlightConfigurationMenu
 extends CanvasLayer
 
 const CONFIGURATION_FILENAME := "open_odyssey_configuration.json"
+const AIRCRAFT_FAMILY_CATALOG_PATH := "res://data/aircraft_families.json"
 const DEFAULT_AIRCRAFT_ID := "test-airplane"
 const DEFAULT_MAP_ID := "test-playground"
 
@@ -10,6 +11,7 @@ static var _remembered_map_id := DEFAULT_MAP_ID
 
 var _aircraft_configurations: Array[Dictionary] = []
 var _map_configurations: Array[Dictionary] = []
+var _aircraft_families: Dictionary = {}
 var _overlay: Control
 var _aircraft_selector: OptionButton
 var _map_selector: OptionButton
@@ -20,6 +22,7 @@ var _current_configuration_label: Label
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	_load_aircraft_family_catalog()
 	_aircraft_configurations.append(_default_configuration(
 		DEFAULT_AIRCRAFT_ID
 	))
@@ -89,12 +92,64 @@ func selected_map_label() -> String:
 	return _label_for_id(_map_configurations, _remembered_map_id)
 
 
+func aircraft_family_display_name(family_id: String) -> String:
+	var family := _aircraft_families.get(family_id, {}) as Dictionary
+	return family.get("display_name", "")
+
+
+func stock_parts_label_for_family(family_id: String) -> String:
+	var family := _aircraft_families.get(family_id, {}) as Dictionary
+	if family.is_empty():
+		return ""
+	if family.get("configuration", "") == "fixed":
+		return "Fixed factory configuration"
+	var labels: Array[String] = []
+	for part_value in family.get("part_families", []):
+		var part := part_value as Dictionary
+		labels.append(
+			"%s %d"
+			% [
+				part.get("display_name", part.get("id", "Part")),
+				int(part.get("stock_variant", 1))
+			]
+		)
+	return ", ".join(labels)
+
+
 func _default_configuration(configuration_id: String) -> Dictionary:
 	return {
 		"id": configuration_id,
 		"label": configuration_id,
 		"component_scene": "",
 	}
+
+
+func _load_aircraft_family_catalog() -> void:
+	var file := FileAccess.open(
+		AIRCRAFT_FAMILY_CATALOG_PATH,
+		FileAccess.READ
+	)
+	if file == null:
+		push_error("Aircraft family catalog is unavailable.")
+		return
+	var parsed: Variant = JSON.parse_string(file.get_as_text())
+	if not parsed is Dictionary or not parsed.has("families"):
+		push_error("Aircraft family catalog is invalid.")
+		return
+	for family_value in parsed["families"]:
+		if not family_value is Dictionary:
+			push_error("Aircraft family catalog contains a non-object entry.")
+			continue
+		var family := family_value as Dictionary
+		if (
+			not family.get("id") is String
+			or not family.get("display_name") is String
+			or not family.get("part_families") is Array
+			or not family.get("optional_parts") is Array
+		):
+			push_error("Aircraft family catalog contains an invalid entry.")
+			continue
+		_aircraft_families[family["id"]] = family
 
 
 func _discover_configurations(directory_path: String) -> void:
@@ -153,7 +208,7 @@ func _register_configuration(
 			% configuration_path
 		)
 		return
-	var configuration := value as Dictionary
+	var configuration := (value as Dictionary).duplicate(true)
 	for required_key in ["kind", "id", "label", "component_scene"]:
 		if not configuration.has(required_key):
 			push_warning(
@@ -181,6 +236,21 @@ func _register_configuration(
 			% configuration_path
 		)
 		return
+	if configuration.has("aircraft_family_id"):
+		if not configuration["aircraft_family_id"] is String:
+			push_warning(
+				"Aircraft family id is not a string: %s"
+				% configuration_path
+			)
+			return
+		var family_id := configuration["aircraft_family_id"] as String
+		if not _aircraft_families.has(family_id):
+			push_warning(
+				"Unknown aircraft family '%s': %s"
+				% [family_id, configuration_path]
+			)
+			return
+		configuration["label"] = aircraft_family_display_name(family_id)
 	if not ResourceLoader.exists(configuration["component_scene"]):
 		push_warning(
 			"Local flight configuration component is missing: %s"
@@ -613,7 +683,20 @@ func _label_for_id(
 func _update_current_configuration_label() -> void:
 	if _current_configuration_label == null:
 		return
+	var aircraft_configuration := _configuration_for_id(
+		_aircraft_configurations,
+		_remembered_aircraft_id
+	)
+	var parts_label := "Standard prototype"
+	if aircraft_configuration.has("aircraft_family_id"):
+		parts_label = stock_parts_label_for_family(
+			aircraft_configuration["aircraft_family_id"]
+		)
 	_current_configuration_label.text = (
-		"CONFIG  %s  /  %s    [Start or Tab: configure]"
-		% [selected_aircraft_label(), selected_map_label()]
+		"CONFIG  %s  /  %s    [Start or Tab: configure]\nPARTS  %s"
+		% [
+			selected_aircraft_label(),
+			selected_map_label(),
+			parts_label
+		]
 	)

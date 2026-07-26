@@ -30,6 +30,25 @@ func _run() -> void:
 		push_error("Default flight configuration labels changed.")
 		quit(1)
 		return
+	if (
+		configuration_menu.aircraft_family_display_name("bf-109")
+		!= "Bf-109"
+		or configuration_menu.stock_parts_label_for_family("bf-109")
+		!= (
+			"Wing 1, Tail 1, Engine 1, Body 1, Canopy 1, "
+			+ "Propeller 1"
+		)
+		or configuration_menu.stock_parts_label_for_family("twin-wing")
+		!= (
+			"Wing 1, Tail 1, Engine 1, Body 1, Canopy 1, "
+			+ "Propeller 1, Tire 1"
+		)
+		or configuration_menu.stock_parts_label_for_family("f-117")
+		!= "Fixed factory configuration"
+	):
+		push_error("Aircraft family or stock-part catalog is invalid.")
+		quit(1)
+		return
 	var property_probe := Node.new()
 	if (
 		not configuration_menu._set_object_property(

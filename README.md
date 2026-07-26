@@ -59,6 +59,20 @@ an unsaved choice, or moves back. The built-in configuration is `test-airplane`
 on `test-playground`; ignored local experiments can add options without being
 required by a clean checkout.
 
+### Aircraft families
+
+`game/data/aircraft_families.json` records the eleven supported aircraft
+families and their configuration types. Bf-109, Twin Wing, and Pulse Jet expose
+Wing, Tail, Engine, Body, Canopy, and Propeller families; Twin Wing also has a
+required Tire family. Their stock loadout selects variant 1 in each required
+family and leaves optional floats and boosters disabled. The remaining aircraft
+use fixed factory configurations.
+
+Local aircraft configuration files can provide an `aircraft_family_id`. The
+configuration menu then uses the catalog's aircraft name and displays its stock
+parts. The catalog contains metadata only; extracted models and other original
+game content remain outside version control.
+
 Pull the left stick down to pitch upward. The HUD displays the controller name
 that Godot detects. Some unbranded PS2-to-USB adapters expose nonstandard button
 numbers; run the controller probe below if the mapping does not respond.
