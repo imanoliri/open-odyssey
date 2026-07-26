@@ -9,8 +9,8 @@ extends Node3D
 @export var engine_max_amplitude := 0.34
 @export var wind_full_level_speed_metres_per_second := 75.0
 @export var wind_max_amplitude := 0.34
-@export var wind_whistle_min_frequency_hz := 420.0
-@export var wind_whistle_max_frequency_hz := 1500.0
+@export var wind_whistle_min_frequency_hz := 280.0
+@export var wind_whistle_max_frequency_hz := 900.0
 @export var wind_whistle_mix := 0.08
 @export_range(8, 64, 1) var wind_noise_interpolation_samples := 24
 @export var level_smoothing := 5.0
