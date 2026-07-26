@@ -69,6 +69,20 @@ func _run() -> void:
 		return
 
 	if (
+		audio.engine_player.global_position.distance_to(
+			aircraft.global_position
+		) > 0.01
+	):
+		push_error("Engine sound source is not following the aircraft.")
+		quit(1)
+		return
+
+	if not audio.engine_player.playing or not audio.wind_player.playing:
+		push_error("Aircraft audio players are not running.")
+		quit(1)
+		return
+
+	if (
 		audio.engine_amplitude_for_throttle(1.0)
 		<= audio.engine_amplitude_for_throttle(0.25)
 	):

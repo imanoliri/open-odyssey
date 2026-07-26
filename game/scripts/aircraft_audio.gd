@@ -1,11 +1,12 @@
 class_name AircraftAudioController
-extends Node
+extends Node3D
 
 @export var aircraft_path: NodePath
 @export var mix_rate := 22050.0
 @export var engine_idle_frequency_hz := 42.0
 @export var engine_full_frequency_hz := 135.0
-@export var engine_max_amplitude := 0.28
+@export var engine_idle_amplitude := 0.045
+@export var engine_max_amplitude := 0.34
 @export var wind_full_level_speed_metres_per_second := 75.0
 @export var wind_max_amplitude := 0.34
 @export var level_smoothing := 5.0
@@ -84,7 +85,11 @@ func _exit_tree() -> void:
 
 
 func engine_amplitude_for_throttle(throttle_value: float) -> float:
-	return clampf(throttle_value, 0.0, 1.0) * engine_max_amplitude
+	return lerpf(
+		engine_idle_amplitude,
+		engine_max_amplitude,
+		clampf(throttle_value, 0.0, 1.0)
+	)
 
 
 func engine_frequency_for_throttle(throttle_value: float) -> float:

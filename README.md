@@ -77,8 +77,9 @@ camera, ground interaction, controls, telemetry, and restart behavior before art
 production.
 
 Audio is generated procedurally at runtime: propeller volume and frequency rise
-with throttle, while filtered wind-noise volume rises with airspeed. No extracted
-or third-party sound assets are required.
+from an audible idle with throttle, while filtered wind-noise volume rises with
+airspeed. The 3D propeller source follows the aircraft and is tuned for the chase
+camera distance. No extracted or third-party sound assets are required.
 
 The upper-right HUD panel reads its values directly from the aircraft. Blank
 lines separate engine, aerodynamics, control-authority, and physical values
