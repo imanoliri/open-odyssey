@@ -102,3 +102,67 @@ func telemetry_text() -> String:
 		"AIRSPEED  %5.1f m/s\nALTITUDE  %5.1f m\nTHROTTLE   %3.0f%%\nSTATE      %s"
 		% [indicated_airspeed, global_position.y, throttle * 100.0, stall_text]
 	)
+
+
+func physical_characteristics_text() -> String:
+	var box_size := _collision_box_size()
+	var surface_friction := 0.0
+	var surface_bounce := 0.0
+	if physics_material_override != null:
+		surface_friction = physics_material_override.friction
+		surface_bounce = physics_material_override.bounce
+
+	var template := (
+		"AIRCRAFT PHYSICS\n"
+		+ "MASS             %7.1f kg\n"
+		+ "MAX THRUST       %7.0f N\n"
+		+ "THROTTLE RATE    %7.2f /s\n"
+		+ "AIR DENSITY      %7.3f kg/m³\n"
+		+ "WING AREA        %7.2f m²\n"
+		+ "LIFT COEFF       %7.3f\n"
+		+ "DRAG COEFF       %7.3f\n"
+		+ "LATERAL DRAG     %7.3f\n"
+		+ "STALL SPEED      %7.2f m/s\n"
+		+ "FULL CONTROL     %7.2f m/s\n"
+		+ "PITCH TORQUE     %7.0f N·m\n"
+		+ "ROLL TORQUE      %7.0f N·m\n"
+		+ "YAW TORQUE       %7.0f N·m\n"
+		+ "LINEAR DAMP      %7.3f\n"
+		+ "ANGULAR DAMP     %7.3f\n"
+		+ "GRAVITY SCALE    %7.3f\n"
+		+ "BOX W×H×L       %4.2f × %4.2f × %4.2f m\n"
+		+ "FRICTION/BOUNCE %5.2f / %5.2f"
+	)
+	return template % [
+			mass,
+			maximum_thrust_newtons,
+			throttle_change_per_second,
+			air_density,
+			wing_area_square_metres,
+			lift_coefficient,
+			drag_coefficient,
+			lateral_drag_coefficient,
+			stall_speed_metres_per_second,
+			full_control_speed_metres_per_second,
+			pitch_torque_newton_metres,
+			roll_torque_newton_metres,
+			yaw_torque_newton_metres,
+			linear_damp,
+			angular_damp,
+			gravity_scale,
+			box_size.x,
+			box_size.y,
+			box_size.z,
+			surface_friction,
+			surface_bounce
+		]
+
+
+func _collision_box_size() -> Vector3:
+	var collision := get_node_or_null("CollisionShape3D") as CollisionShape3D
+	if collision == null:
+		return Vector3.ZERO
+	var box := collision.shape as BoxShape3D
+	if box == null:
+		return Vector3.ZERO
+	return box.size

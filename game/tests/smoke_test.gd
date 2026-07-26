@@ -22,6 +22,21 @@ func _run() -> void:
 		quit(1)
 		return
 
+	var physics_text := aircraft.physical_characteristics_text()
+	for required_text in [
+		"MAX THRUST",
+		"ROLL TORQUE",
+		"YAW TORQUE",
+		"BOX W×H×L",
+		"2.00 × 0.80 × 5.40 m"
+	]:
+		if not physics_text.contains(required_text):
+			push_error(
+				"Aircraft physics panel is missing: %s" % required_text
+			)
+			quit(1)
+			return
+
 	var camera_rig := scene.get_node_or_null("CameraRig") as Node3D
 	if camera_rig == null:
 		push_error("Smoke test could not find CameraRig.")

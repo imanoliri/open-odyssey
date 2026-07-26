@@ -3,6 +3,7 @@ extends Control
 @export var aircraft_path: NodePath
 
 @onready var telemetry_label: Label = %Telemetry
+@onready var physics_parameters_label: Label = %PhysicsParameters
 var aircraft: PrototypeAircraft
 
 
@@ -20,6 +21,7 @@ func _process(_delta: float) -> void:
 			aircraft.telemetry_text()
 			+ "\nCONTROLLER %s" % _controller_name()
 		)
+		physics_parameters_label.text = aircraft.physical_characteristics_text()
 
 
 func _controller_name() -> String:
