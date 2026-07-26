@@ -12,6 +12,7 @@ extends Node3D
 @export var wind_whistle_min_frequency_hz := 420.0
 @export var wind_whistle_max_frequency_hz := 1500.0
 @export var wind_whistle_mix := 0.08
+@export_range(8, 64, 1) var wind_noise_interpolation_samples := 24
 @export var level_smoothing := 5.0
 
 @onready var engine_player: AudioStreamPlayer3D = $Engine
@@ -21,8 +22,10 @@ var aircraft: PrototypeAircraft
 var engine_playback: AudioStreamGeneratorPlayback
 var wind_playback: AudioStreamGeneratorPlayback
 var engine_phase := 0.0
-var wind_fast_filtered_sample := 0.0
-var wind_slow_filtered_sample := 0.0
+var wind_noise_from := 0.0
+var wind_noise_target := 0.0
+var wind_noise_samples_remaining := 0
+var wind_baseline_sample := 0.0
 var wind_whistle_phase := 0.0
 var wind_whistle_secondary_phase := 0.0
 var wind_wander_phase := 0.0
@@ -160,21 +163,7 @@ func _fill_wind_buffer() -> void:
 		return
 
 	for frame in wind_playback.get_frames_available():
-		var raw_noise := randf_range(-1.0, 1.0)
-		wind_fast_filtered_sample = lerpf(
-			wind_fast_filtered_sample,
-			raw_noise,
-			0.30
-		)
-		wind_slow_filtered_sample = lerpf(
-			wind_slow_filtered_sample,
-			raw_noise,
-			0.025
-		)
-		var clean_air_noise := (
-			wind_fast_filtered_sample
-			- wind_slow_filtered_sample
-		) * 1.35
+		var clean_air_noise := _next_interpolated_airflow_sample()
 
 		wind_whistle_phase = fmod(
 			wind_whistle_phase
@@ -200,7 +189,34 @@ func _fill_wind_buffer() -> void:
 			+ 0.32 * sin(wind_whistle_secondary_phase)
 		) / 1.32
 		var sample := (
-			clean_air_noise * 0.70
+			clean_air_noise * 0.78
 			+ whistle * wind_whistle_mix * whistle_envelope
 		) * current_wind_amplitude
 		wind_playback.push_frame(Vector2(sample, sample))
+
+
+func _next_interpolated_airflow_sample() -> float:
+	var interval := maxi(wind_noise_interpolation_samples, 1)
+	if wind_noise_samples_remaining <= 0:
+		wind_noise_from = wind_noise_target
+		wind_noise_target = randf_range(-1.0, 1.0)
+		wind_noise_samples_remaining = interval
+
+	var progress := (
+		1.0
+		- float(wind_noise_samples_remaining) / float(interval)
+	)
+	var smooth_progress := progress * progress * (3.0 - 2.0 * progress)
+	var interpolated_noise := lerpf(
+		wind_noise_from,
+		wind_noise_target,
+		smooth_progress
+	)
+	wind_noise_samples_remaining -= 1
+
+	wind_baseline_sample = lerpf(
+		wind_baseline_sample,
+		interpolated_noise,
+		0.004
+	)
+	return (interpolated_noise - wind_baseline_sample) * 1.25

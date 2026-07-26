@@ -119,6 +119,11 @@ func _run() -> void:
 		quit(1)
 		return
 
+	if audio.wind_noise_interpolation_samples < 16:
+		push_error("Wind airflow interpolation is too short to sound smooth.")
+		quit(1)
+		return
+
 	var camera_rig := scene.get_node_or_null("CameraRig") as Node3D
 	if camera_rig == null:
 		push_error("Smoke test could not find CameraRig.")
