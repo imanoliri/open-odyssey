@@ -9,6 +9,9 @@ extends Node3D
 @export var engine_max_amplitude := 0.34
 @export var wind_full_level_speed_metres_per_second := 75.0
 @export var wind_max_amplitude := 0.34
+@export var wind_whistle_min_frequency_hz := 420.0
+@export var wind_whistle_max_frequency_hz := 1500.0
+@export var wind_whistle_mix := 0.22
 @export var level_smoothing := 5.0
 
 @onready var engine_player: AudioStreamPlayer3D = $Engine
@@ -18,10 +21,14 @@ var aircraft: PrototypeAircraft
 var engine_playback: AudioStreamGeneratorPlayback
 var wind_playback: AudioStreamGeneratorPlayback
 var engine_phase := 0.0
-var wind_filtered_sample := 0.0
+var wind_low_pass_sample := 0.0
+var wind_whistle_phase := 0.0
+var wind_whistle_secondary_phase := 0.0
+var wind_wander_phase := 0.0
 var current_engine_amplitude := 0.0
 var current_wind_amplitude := 0.0
 var current_engine_frequency_hz := 0.0
+var current_wind_whistle_frequency_hz := 0.0
 
 
 func _ready() -> void:
@@ -70,6 +77,11 @@ func _physics_process(delta: float) -> void:
 		engine_frequency_for_throttle(aircraft.throttle),
 		level_blend
 	)
+	current_wind_whistle_frequency_hz = lerpf(
+		current_wind_whistle_frequency_hz,
+		wind_whistle_frequency_for_speed(aircraft.indicated_airspeed),
+		level_blend
+	)
 
 	_fill_engine_buffer()
 	_fill_wind_buffer()
@@ -101,13 +113,26 @@ func engine_frequency_for_throttle(throttle_value: float) -> float:
 
 
 func wind_amplitude_for_speed(speed_metres_per_second: float) -> float:
-	var normalized_speed := clampf(
+	return _normalized_wind_speed(speed_metres_per_second) * wind_max_amplitude
+
+
+func wind_whistle_frequency_for_speed(
+	speed_metres_per_second: float
+) -> float:
+	return lerpf(
+		wind_whistle_min_frequency_hz,
+		wind_whistle_max_frequency_hz,
+		_normalized_wind_speed(speed_metres_per_second)
+	)
+
+
+func _normalized_wind_speed(speed_metres_per_second: float) -> float:
+	return clampf(
 		speed_metres_per_second
 		/ maxf(wind_full_level_speed_metres_per_second, 0.001),
 		0.0,
 		1.0
 	)
-	return normalized_speed * wind_max_amplitude
 
 
 func _fill_engine_buffer() -> void:
@@ -135,10 +160,38 @@ func _fill_wind_buffer() -> void:
 
 	for frame in wind_playback.get_frames_available():
 		var raw_noise := randf_range(-1.0, 1.0)
-		wind_filtered_sample = lerpf(
-			wind_filtered_sample,
+		wind_low_pass_sample = lerpf(
+			wind_low_pass_sample,
 			raw_noise,
-			0.22
+			0.075
 		)
-		var sample := wind_filtered_sample * current_wind_amplitude
+		var bright_air_noise := raw_noise - wind_low_pass_sample
+
+		wind_whistle_phase = fmod(
+			wind_whistle_phase
+			+ TAU * current_wind_whistle_frequency_hz / mix_rate,
+			TAU
+		)
+		wind_whistle_secondary_phase = fmod(
+			wind_whistle_secondary_phase
+			+ TAU
+			* current_wind_whistle_frequency_hz
+			* 1.43
+			/ mix_rate,
+			TAU
+		)
+		wind_wander_phase = fmod(
+			wind_wander_phase + TAU * 0.65 / mix_rate,
+			TAU
+		)
+
+		var whistle_envelope := 0.72 + 0.28 * sin(wind_wander_phase)
+		var whistle := (
+			sin(wind_whistle_phase)
+			+ 0.32 * sin(wind_whistle_secondary_phase)
+		) / 1.32
+		var sample := (
+			bright_air_noise * 0.62
+			+ whistle * wind_whistle_mix * whistle_envelope
+		) * current_wind_amplitude
 		wind_playback.push_frame(Vector2(sample, sample))

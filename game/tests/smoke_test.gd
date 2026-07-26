@@ -106,6 +106,14 @@ func _run() -> void:
 		quit(1)
 		return
 
+	if (
+		audio.wind_whistle_frequency_for_speed(60.0)
+		<= audio.wind_whistle_frequency_for_speed(15.0)
+	):
+		push_error("Wind whistle pitch is not proportional to airspeed.")
+		quit(1)
+		return
+
 	var camera_rig := scene.get_node_or_null("CameraRig") as Node3D
 	if camera_rig == null:
 		push_error("Smoke test could not find CameraRig.")
