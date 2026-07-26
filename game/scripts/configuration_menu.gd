@@ -119,13 +119,41 @@ func _read_configuration(configuration_path: String) -> void:
 		)
 		return
 	var parsed: Variant = JSON.parse_string(file.get_as_text())
+	if parsed is Array:
+		for entry in parsed:
+			_register_configuration(entry, configuration_path)
+		return
 	if not parsed is Dictionary:
 		push_warning(
-			"Local flight configuration is not a JSON object: %s"
+			"Local flight configuration is not an object or array: %s"
 			% configuration_path
 		)
 		return
-	var configuration := parsed as Dictionary
+	var document := parsed as Dictionary
+	if document.has("configurations"):
+		if not document["configurations"] is Array:
+			push_warning(
+				"Local flight configuration catalog is not an array: %s"
+				% configuration_path
+			)
+			return
+		for entry in document["configurations"]:
+			_register_configuration(entry, configuration_path)
+		return
+	_register_configuration(document, configuration_path)
+
+
+func _register_configuration(
+	value: Variant,
+	configuration_path: String
+) -> void:
+	if not value is Dictionary:
+		push_warning(
+			"Local flight configuration entry is not an object: %s"
+			% configuration_path
+		)
+		return
+	var configuration := value as Dictionary
 	for required_key in ["kind", "id", "label", "component_scene"]:
 		if not configuration.has(required_key):
 			push_warning(
@@ -141,6 +169,15 @@ func _read_configuration(configuration_path: String) -> void:
 	):
 		push_warning(
 			"Local flight configuration has invalid field types: %s"
+			% configuration_path
+		)
+		return
+	if (
+		configuration.has("component_properties")
+		and not configuration["component_properties"] is Dictionary
+	):
+		push_warning(
+			"Local flight component properties are not an object: %s"
 			% configuration_path
 		)
 		return
@@ -505,7 +542,44 @@ func _instantiate_component(
 		return
 	var component := packed_scene.instantiate()
 	component.name = component_name
+	var component_properties: Dictionary = configuration.get(
+		"component_properties",
+		{}
+	)
+	for property_key in component_properties:
+		var property_name := str(property_key)
+		if not _set_object_property(
+			component,
+			property_name,
+			component_properties[property_key]
+		):
+			push_warning(
+				"Flight component lacks property '%s': %s"
+				% [property_name, component_path]
+			)
 	get_parent().add_child.call_deferred(component)
+
+
+func _set_object_property(
+	object: Object,
+	property_name: String,
+	value: Variant
+) -> bool:
+	for property in object.get_property_list():
+		if property["name"] != property_name:
+			continue
+		match property["type"]:
+			TYPE_INT:
+				value = int(value)
+			TYPE_FLOAT:
+				value = float(value)
+			TYPE_BOOL:
+				value = bool(value)
+			TYPE_STRING:
+				value = str(value)
+		object.set(property_name, value)
+		return true
+	return false
 
 
 func _validated_selection_id(

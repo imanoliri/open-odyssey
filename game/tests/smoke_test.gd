@@ -30,6 +30,23 @@ func _run() -> void:
 		push_error("Default flight configuration labels changed.")
 		quit(1)
 		return
+	var property_probe := Node.new()
+	if (
+		not configuration_menu._set_object_property(
+			property_probe,
+			"process_priority",
+			7.0
+		)
+		or property_probe.process_priority != 7
+		or configuration_menu._set_object_property(
+			property_probe,
+			"missing_property",
+			1
+		)
+	):
+		push_error("Configuration component property assignment failed.")
+		quit(1)
+		return
 	for restart_event in InputMap.action_get_events("restart"):
 		if (
 			restart_event is InputEventJoypadButton
