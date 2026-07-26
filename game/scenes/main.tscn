@@ -168,4 +168,4 @@ theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
 theme_override_constants/shadow_offset_x = 2
 theme_override_constants/shadow_offset_y = 2
 theme_override_font_sizes/font_size = 16
-text = "Keyboard: W/S pitch  A/D roll  Q/E yaw  R/F throttle  Enter restart\nGamepad: left stick pitch/roll  right stick yaw  L1/R1 throttle  Start restart"
+text = "Keyboard: W/S pitch  A/D roll  Q/E or arrows yaw  R/F throttle  Enter restart\nGamepad: left stick pitch/roll  right stick or L2/R2 yaw  L1/R1 throttle  Start restart"

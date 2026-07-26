@@ -32,7 +32,7 @@ From PowerShell:
 |---|---|
 | Pitch | W / S |
 | Roll | A / D |
-| Yaw | Q / E |
+| Yaw | Q / E or Left / Right Arrow |
 | Throttle | R / F |
 | Restart | Enter |
 
@@ -45,7 +45,7 @@ The prototype uses Godot's standard gamepad layout:
 | Control | PS2-style controller |
 |---|---|
 | Pitch and roll | Left analog stick |
-| Yaw | Right analog stick, horizontal |
+| Yaw | Right analog stick, horizontal, or L2 / R2 |
 | Throttle down/up | L1 / R1 |
 | Restart | Start |
 
