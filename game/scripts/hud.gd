@@ -8,6 +8,10 @@ var aircraft: PrototypeAircraft
 
 func _ready() -> void:
 	aircraft = get_node_or_null(aircraft_path) as PrototypeAircraft
+	if aircraft == null:
+		aircraft = get_parent().get_node_or_null(
+			"PlayerAircraft"
+		) as PrototypeAircraft
 
 
 func _process(_delta: float) -> void:

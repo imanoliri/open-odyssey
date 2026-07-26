@@ -22,18 +22,41 @@ func _run() -> void:
 		quit(1)
 		return
 
+	var camera_rig := scene.get_node_or_null("CameraRig") as Node3D
+	if camera_rig == null:
+		push_error("Smoke test could not find CameraRig.")
+		quit(1)
+		return
+
 	var starting_position := aircraft.global_position
+	var camera_starting_position := camera_rig.global_position
+	var camera_starting_rotation := camera_rig.global_rotation
+	print(
+		"SMOKE camera setup: physics_processing=%s start=%s"
+		% [
+			camera_rig.is_physics_processing(),
+			camera_starting_position
+		]
+	)
 	Input.action_press("throttle_up")
 	for frame in 180:
 		await physics_frame
 	Input.action_release("throttle_up")
+	await process_frame
 
 	var distance_travelled := aircraft.global_position.distance_to(starting_position)
+	var camera_distance_travelled := camera_rig.global_position.distance_to(
+		camera_starting_position
+	)
+	var camera_rotation_change := camera_rig.global_rotation.distance_to(
+		camera_starting_rotation
+	)
 	print(
-		"SMOKE telemetry: speed=%.2f m/s distance=%.2f m altitude=%.2f m throttle=%.2f"
+		"SMOKE telemetry: speed=%.2f m/s plane_distance=%.2f m camera_distance=%.2f m altitude=%.2f m throttle=%.2f"
 		% [
 			aircraft.indicated_airspeed,
 			distance_travelled,
+			camera_distance_travelled,
 			aircraft.global_position.y,
 			aircraft.throttle
 		]
@@ -49,5 +72,17 @@ func _run() -> void:
 		quit(1)
 		return
 
-	print("SMOKE PASS: scene loaded and aircraft propulsion advanced the simulation.")
+	if camera_distance_travelled < 1.0:
+		push_error("Camera did not follow the aircraft's position.")
+		quit(1)
+		return
+
+	if camera_rotation_change > 0.0001:
+		push_error("Camera angle changed while following the aircraft.")
+		quit(1)
+		return
+
+	print(
+		"SMOKE PASS: propulsion advanced and camera followed with fixed rotation."
+	)
 	quit(0)

@@ -60,10 +60,10 @@ numbers; run the controller probe below if the mapping does not respond.
 
 ### Camera
 
-The chase camera follows the aircraft's horizontal heading while keeping a fixed
-elevation angle and a level horizon. Aircraft pitch and roll no longer tilt the
-camera. The distance, height, smoothing, and fixed pitch remain editable on the
-`CameraRig` node.
+The camera follows the aircraft's position using a constant world-space offset.
+Its viewing rotation stays completely fixed: aircraft pitch, roll, yaw, and
+direction do not rotate it. The offset, rotation, and position smoothing remain
+editable on the `CameraRig` node.
 
 ## Verify
 
