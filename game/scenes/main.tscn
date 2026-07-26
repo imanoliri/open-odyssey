@@ -1,9 +1,10 @@
-[gd_scene load_steps=19 format=3]
+[gd_scene load_steps=20 format=3]
 
 [ext_resource type="Script" path="res://scripts/main.gd" id="1_main"]
 [ext_resource type="Script" path="res://scripts/aircraft.gd" id="2_aircraft"]
 [ext_resource type="Script" path="res://scripts/camera_rig.gd" id="3_camera"]
 [ext_resource type="Script" path="res://scripts/hud.gd" id="4_hud"]
+[ext_resource type="Script" path="res://scripts/aircraft_audio.gd" id="5_audio"]
 
 [sub_resource type="Environment" id="Environment_world"]
 background_mode = 1
@@ -123,6 +124,17 @@ mesh = SubResource("Mesh_tail")
 position = Vector3(0, 0.72, 2.05)
 mesh = SubResource("Mesh_fin")
 
+[node name="AudioController" type="Node3D" parent="PlayerAircraft" node_paths=PackedStringArray("aircraft_path")]
+script = ExtResource("5_audio")
+aircraft_path = NodePath("..")
+
+[node name="Engine" type="AudioStreamPlayer3D" parent="PlayerAircraft/AudioController"]
+unit_size = 20.0
+max_distance = 500.0
+volume_db = 3.0
+
+[node name="Wind" type="AudioStreamPlayer" parent="PlayerAircraft/AudioController"]
+
 [node name="CameraRig" type="Node3D" parent="." node_paths=PackedStringArray("target_path")]
 script = ExtResource("3_camera")
 target_path = NodePath("../PlayerAircraft")
@@ -157,6 +169,24 @@ theme_override_colors/font_color = Color(0.83, 0.96, 1, 1)
 theme_override_font_sizes/font_size = 18
 text = "AIRSPEED\nALTITUDE\nTHROTTLE\nSTATE\nCONTROLLER"
 
+[node name="PhysicsPanel" type="PanelContainer" parent="HUD"]
+layout_mode = 0
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -24.0
+offset_top = 24.0
+offset_right = -24.0
+offset_bottom = 435.0
+grow_horizontal = 0
+theme_override_styles/panel = SubResource("Style_hud")
+
+[node name="PhysicsParameters" type="Label" parent="HUD/PhysicsPanel"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.83, 0.96, 1, 1)
+theme_override_font_sizes/font_size = 13
+text = "MAX THRUST\nTHROTTLE RATE\nTHRUST / WEIGHT\n\nWING AREA\nLIFT COEFF\nDRAG COEFF\n\nPITCH TORQUE\nROLL TORQUE\nYAW TORQUE\n\nMASS\nBOX W x H x L\nINERTIA P/Y/R\nPITCH RATE\nYAW RATE\nROLL RATE"
+
 [node name="Instructions" type="Label" parent="HUD"]
 layout_mode = 0
 offset_left = 24.0
@@ -168,4 +198,4 @@ theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
 theme_override_constants/shadow_offset_x = 2
 theme_override_constants/shadow_offset_y = 2
 theme_override_font_sizes/font_size = 16
-text = "Keyboard: W/S pitch  A/D roll  Q/E yaw  R/F throttle  Enter restart\nGamepad: left stick pitch/roll  right stick yaw  L1/R1 throttle  Start restart"
+text = "Keyboard: W/S pitch  A/D roll  Q/E or arrows yaw  R/F throttle  Enter restart\nGamepad: left stick pitch/roll  right stick yaw  L2 right/R2 left yaw  L1/R1 throttle  Start restart"

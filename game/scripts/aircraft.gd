@@ -17,7 +17,7 @@ extends RigidBody3D
 
 @export_category("Control torque")
 @export var pitch_torque_newton_metres := 9500.0
-@export var roll_torque_newton_metres := 12500.0
+@export var roll_torque_newton_metres := 4375.0
 @export var yaw_torque_newton_metres := 4500.0
 
 var throttle := 0.0
@@ -101,4 +101,101 @@ func telemetry_text() -> String:
 	return (
 		"AIRSPEED  %5.1f m/s\nALTITUDE  %5.1f m\nTHROTTLE   %3.0f%%\nSTATE      %s"
 		% [indicated_airspeed, global_position.y, throttle * 100.0, stall_text]
+	)
+
+
+func physical_characteristics_text() -> String:
+	var box_size := _collision_box_size()
+	var moments_of_inertia := _box_moments_of_inertia(box_size)
+	var weight_newtons := maxf(mass * 9.80665 * gravity_scale, 0.001)
+	var thrust_to_weight_ratio := maximum_thrust_newtons / weight_newtons
+	var local_angular_velocity := (
+		global_transform.basis.orthonormalized().inverse()
+		* angular_velocity
+	)
+	var rotation_rates_degrees := Vector3(
+		rad_to_deg(local_angular_velocity.x),
+		rad_to_deg(local_angular_velocity.y),
+		rad_to_deg(local_angular_velocity.z)
+	)
+	var surface_friction := 0.0
+	var surface_bounce := 0.0
+	if physics_material_override != null:
+		surface_friction = physics_material_override.friction
+		surface_bounce = physics_material_override.bounce
+
+	var template := (
+		"MAX THRUST          %8.0f N\n"
+		+ "THROTTLE RATE       %8.2f /s\n"
+		+ "THRUST / WEIGHT     %8.3f\n"
+		+ "\n"
+		+ "WING AREA           %8.2f m^2\n"
+		+ "LIFT COEFF          %8.3f\n"
+		+ "DRAG COEFF          %8.3f\n"
+		+ "LATERAL DRAG        %8.3f\n"
+		+ "STALL SPEED         %8.2f m/s\n"
+		+ "FULL CONTROL        %8.2f m/s\n"
+		+ "\n"
+		+ "PITCH TORQUE        %8.0f N*m\n"
+		+ "ROLL TORQUE         %8.0f N*m\n"
+		+ "YAW TORQUE          %8.0f N*m\n"
+		+ "\n"
+		+ "MASS                %8.1f kg\n"
+		+ "LINEAR DAMP         %8.3f\n"
+		+ "ANGULAR DAMP        %8.3f\n"
+		+ "BOX W x H x L  %4.2f x %4.2f x %4.2f m\n"
+		+ "FRICTION / BOUNCE %6.2f / %6.2f\n"
+		+ "INERTIA P/Y/R %7.2f / %7.2f / %7.2f kg*m^2\n"
+		+ "PITCH RATE          %8.2f deg/s\n"
+		+ "YAW RATE            %8.2f deg/s\n"
+		+ "ROLL RATE           %8.2f deg/s"
+	)
+	return template % [
+			maximum_thrust_newtons,
+			throttle_change_per_second,
+			thrust_to_weight_ratio,
+			wing_area_square_metres,
+			lift_coefficient,
+			drag_coefficient,
+			lateral_drag_coefficient,
+			stall_speed_metres_per_second,
+			full_control_speed_metres_per_second,
+			pitch_torque_newton_metres,
+			roll_torque_newton_metres,
+			yaw_torque_newton_metres,
+			mass,
+			linear_damp,
+			angular_damp,
+			box_size.x,
+			box_size.y,
+			box_size.z,
+			surface_friction,
+			surface_bounce,
+			moments_of_inertia.x,
+			moments_of_inertia.y,
+			moments_of_inertia.z,
+			rotation_rates_degrees.x,
+			rotation_rates_degrees.y,
+			rotation_rates_degrees.z
+		]
+
+
+func _collision_box_size() -> Vector3:
+	var collision := get_node_or_null("CollisionShape3D") as CollisionShape3D
+	if collision == null:
+		return Vector3.ZERO
+	var box := collision.shape as BoxShape3D
+	if box == null:
+		return Vector3.ZERO
+	return box.size
+
+
+func _box_moments_of_inertia(box_size: Vector3) -> Vector3:
+	var width_squared := box_size.x * box_size.x
+	var height_squared := box_size.y * box_size.y
+	var length_squared := box_size.z * box_size.z
+	return Vector3(
+		mass * (height_squared + length_squared) / 12.0,
+		mass * (width_squared + length_squared) / 12.0,
+		mass * (width_squared + height_squared) / 12.0
 	)

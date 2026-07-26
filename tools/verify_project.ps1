@@ -12,6 +12,7 @@ $requiredFiles = @(
     $mainScene,
     (Join-Path $gameRoot "scripts\main.gd"),
     (Join-Path $gameRoot "scripts\aircraft.gd"),
+    (Join-Path $gameRoot "scripts\aircraft_audio.gd"),
     (Join-Path $gameRoot "scripts\camera_rig.gd"),
     (Join-Path $gameRoot "scripts\hud.gd"),
     (Join-Path $gameRoot "tests\smoke_test.gd")

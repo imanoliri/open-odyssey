@@ -9,7 +9,8 @@
 - Below the configured stall threshold, lift and control authority degrade.
 - The aircraft collides with the ground and runway.
 - The camera follows without being rigidly attached.
-- The chase camera follows heading while keeping a fixed pitch and level horizon.
+- The camera follows aircraft translation while keeping a constant world-space
+  rotation.
 - The HUD displays airspeed, altitude, throttle, and stall state.
 - A connected standard gamepad is identified in the HUD.
 - Left stick controls pitch/roll; right stick controls yaw; L1/R1 control throttle.
@@ -31,7 +32,7 @@
 | Parser/runtime | Passed | 2026-07-26 | Scene ran for 180 physics frames |
 | Propulsion smoke test | Passed | 2026-07-26 | 20.74 m travel; 21.07 m/s; full throttle |
 | Keyboard controls | Pending | | Requires interactive test |
-| Fixed-angle camera | Pending | | Requires interactive visual test |
+| Fixed-angle position-follow camera | Automated | 2026-07-26 | Translation and constant rotation covered by smoke test |
 | PS2 USB controller detection | Passed | 2026-07-26 | Device 0 detected as `XInput Controller` |
 | PS2 USB controller mapping | Pending | | Requires interactive stick/button test |
 | Takeoff | Pending | | |

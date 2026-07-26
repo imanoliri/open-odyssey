@@ -22,18 +22,143 @@ func _run() -> void:
 		quit(1)
 		return
 
+	var physics_text := aircraft.physical_characteristics_text()
+	for required_text in [
+		"MAX THRUST",
+		"THRUST / WEIGHT",
+		"ROLL TORQUE",
+		"YAW TORQUE",
+		"BOX W x H x L",
+		"2.00 x 0.80 x 5.40 m",
+		"INERTIA P/Y/R",
+		"2359.17 / 2625.17 /  367.33",
+		"PITCH RATE",
+		"YAW RATE",
+		"ROLL RATE"
+	]:
+		if not physics_text.contains(required_text):
+			push_error(
+				"Aircraft physics panel is missing: %s" % required_text
+			)
+			quit(1)
+			return
+
+	for removed_text in [
+		"AIRCRAFT PHYSICS",
+		"[ENGINE]",
+		"STARTING THROTTLE",
+		"AIR DENSITY",
+		"GRAVITY SCALE",
+		"ROTATIONAL STATE",
+		"RATE P/Y/R",
+		"MOMENTUM P/Y/R"
+	]:
+		if physics_text.contains(removed_text):
+			push_error(
+				"Aircraft physics panel still contains: %s" % removed_text
+			)
+			quit(1)
+			return
+
+	var audio := aircraft.get_node_or_null(
+		"AudioController"
+	) as AircraftAudioController
+	if audio == null:
+		push_error("Smoke test could not find AudioController.")
+		quit(1)
+		return
+
+	if (
+		audio.engine_player.global_position.distance_to(
+			aircraft.global_position
+		) > 0.01
+	):
+		push_error("Engine sound source is not following the aircraft.")
+		quit(1)
+		return
+
+	if not audio.engine_player.playing or not audio.wind_player.playing:
+		push_error("Aircraft audio players are not running.")
+		quit(1)
+		return
+
+	if (
+		audio.engine_amplitude_for_throttle(1.0)
+		<= audio.engine_amplitude_for_throttle(0.25)
+	):
+		push_error("Engine sound is not proportional to throttle.")
+		quit(1)
+		return
+
+	if (
+		audio.engine_frequency_for_throttle(1.0)
+		<= audio.engine_frequency_for_throttle(0.25)
+	):
+		push_error("Propeller frequency is not proportional to throttle.")
+		quit(1)
+		return
+
+	if (
+		audio.wind_amplitude_for_speed(60.0)
+		<= audio.wind_amplitude_for_speed(15.0)
+	):
+		push_error("Wind sound is not proportional to airspeed.")
+		quit(1)
+		return
+
+	if (
+		audio.wind_whistle_frequency_for_speed(60.0)
+		<= audio.wind_whistle_frequency_for_speed(15.0)
+	):
+		push_error("Wind whistle pitch is not proportional to airspeed.")
+		quit(1)
+		return
+
+	if audio.wind_whistle_mix > 0.10:
+		push_error("Wind whistle is not mixed as a background element.")
+		quit(1)
+		return
+
+	if audio.wind_noise_interpolation_samples < 16:
+		push_error("Wind airflow interpolation is too short to sound smooth.")
+		quit(1)
+		return
+
+	var camera_rig := scene.get_node_or_null("CameraRig") as Node3D
+	if camera_rig == null:
+		push_error("Smoke test could not find CameraRig.")
+		quit(1)
+		return
+
 	var starting_position := aircraft.global_position
+	var camera_starting_position := camera_rig.global_position
+	var camera_starting_rotation := camera_rig.global_rotation
+	print(
+		"SMOKE camera setup: physics_processing=%s start=%s"
+		% [
+			camera_rig.is_physics_processing(),
+			camera_starting_position
+		]
+	)
 	Input.action_press("throttle_up")
 	for frame in 180:
 		await physics_frame
 	Input.action_release("throttle_up")
+	await process_frame
 
 	var distance_travelled := aircraft.global_position.distance_to(starting_position)
+	var camera_distance_travelled := camera_rig.global_position.distance_to(
+		camera_starting_position
+	)
+	var camera_rotation_change := camera_rig.global_rotation.distance_to(
+		camera_starting_rotation
+	)
 	print(
-		"SMOKE telemetry: speed=%.2f m/s distance=%.2f m altitude=%.2f m throttle=%.2f"
+		"SMOKE telemetry: speed=%.2f m/s plane_distance=%.2f m camera_distance=%.2f m altitude=%.2f m throttle=%.2f"
 		% [
 			aircraft.indicated_airspeed,
 			distance_travelled,
+			camera_distance_travelled,
 			aircraft.global_position.y,
 			aircraft.throttle
 		]
@@ -49,5 +174,27 @@ func _run() -> void:
 		quit(1)
 		return
 
-	print("SMOKE PASS: scene loaded and aircraft propulsion advanced the simulation.")
+	if camera_distance_travelled < 1.0:
+		push_error("Camera did not follow the aircraft's position.")
+		quit(1)
+		return
+
+	if camera_rotation_change > 0.0001:
+		push_error("Camera angle changed while following the aircraft.")
+		quit(1)
+		return
+
+	if (
+		audio.current_engine_amplitude <= 0.0
+		or audio.current_wind_amplitude <= 0.0
+	):
+		push_error("Aircraft audio levels did not respond during simulation.")
+		quit(1)
+		return
+
+	print(
+		"SMOKE PASS: propulsion, fixed camera, engine audio, and wind audio advanced."
+	)
+	scene.queue_free()
+	await process_frame
 	quit(0)
