@@ -1,0 +1,123 @@
+{
+  "version": 1,
+  "families": [
+    {
+      "id": "bf-109",
+      "display_name": "Bf-109",
+      "source_index": 0,
+      "configuration": "configurable",
+      "part_families": [
+        {"id": "wing", "display_name": "Wing", "variant_count": 6, "stock_variant": 1},
+        {"id": "tail", "display_name": "Tail", "variant_count": 5, "stock_variant": 1},
+        {"id": "engine", "display_name": "Engine", "variant_count": 7, "stock_variant": 1},
+        {"id": "body", "display_name": "Body", "variant_count": 3, "stock_variant": 1},
+        {"id": "canopy", "display_name": "Canopy", "variant_count": 3, "stock_variant": 1},
+        {"id": "propeller", "display_name": "Propeller", "variant_count": 3, "stock_variant": 1}
+      ],
+      "optional_parts": [
+        {"id": "water-float", "display_name": "Water Float", "variant_count": 1},
+        {"id": "booster", "display_name": "Booster", "variant_count": 4}
+      ]
+    },
+    {
+      "id": "twin-wing",
+      "display_name": "Twin Wing",
+      "source_index": 1,
+      "configuration": "configurable",
+      "part_families": [
+        {"id": "wing", "display_name": "Wing", "variant_count": 7, "stock_variant": 1},
+        {"id": "tail", "display_name": "Tail", "variant_count": 5, "stock_variant": 1},
+        {"id": "engine", "display_name": "Engine", "variant_count": 7, "stock_variant": 1},
+        {"id": "body", "display_name": "Body", "variant_count": 3, "stock_variant": 1},
+        {"id": "canopy", "display_name": "Canopy", "variant_count": 3, "stock_variant": 1},
+        {"id": "propeller", "display_name": "Propeller", "variant_count": 3, "stock_variant": 1},
+        {"id": "tire", "display_name": "Tire", "variant_count": 2, "stock_variant": 1}
+      ],
+      "optional_parts": [
+        {"id": "water-float", "display_name": "Water Float", "variant_count": 1}
+      ]
+    },
+    {
+      "id": "pulse-jet",
+      "display_name": "Pulse Jet",
+      "source_index": 2,
+      "configuration": "configurable",
+      "part_families": [
+        {"id": "wing", "display_name": "Wing", "variant_count": 6, "stock_variant": 1},
+        {"id": "tail", "display_name": "Tail", "variant_count": 5, "stock_variant": 1},
+        {"id": "engine", "display_name": "Engine", "variant_count": 7, "stock_variant": 1},
+        {"id": "body", "display_name": "Body", "variant_count": 3, "stock_variant": 1},
+        {"id": "canopy", "display_name": "Canopy", "variant_count": 3, "stock_variant": 1},
+        {"id": "propeller", "display_name": "Propeller", "variant_count": 3, "stock_variant": 1}
+      ],
+      "optional_parts": [
+        {"id": "water-float", "display_name": "Water Float", "variant_count": 1},
+        {"id": "booster", "display_name": "Booster", "variant_count": 4}
+      ]
+    },
+    {
+      "id": "shinden",
+      "display_name": "Shinden",
+      "source_index": 3,
+      "configuration": "fixed",
+      "part_families": [],
+      "optional_parts": []
+    },
+    {
+      "id": "shinden-jet",
+      "display_name": "Shinden Jet",
+      "source_index": 4,
+      "configuration": "fixed",
+      "part_families": [],
+      "optional_parts": []
+    },
+    {
+      "id": "f-117",
+      "display_name": "F-117",
+      "source_index": 5,
+      "configuration": "fixed",
+      "part_families": [],
+      "optional_parts": []
+    },
+    {
+      "id": "me-262",
+      "display_name": "Me 262",
+      "source_index": 6,
+      "configuration": "fixed",
+      "part_families": [],
+      "optional_parts": []
+    },
+    {
+      "id": "f4u-corsair",
+      "display_name": "F4U Corsair",
+      "source_index": 7,
+      "configuration": "fixed",
+      "part_families": [],
+      "optional_parts": []
+    },
+    {
+      "id": "autogiro",
+      "display_name": "Autogiro",
+      "source_index": 8,
+      "configuration": "fixed",
+      "part_families": [],
+      "optional_parts": []
+    },
+    {
+      "id": "ufo",
+      "display_name": "UFO",
+      "source_index": 9,
+      "configuration": "fixed",
+      "part_families": [],
+      "optional_parts": []
+    },
+    {
+      "id": "ufo-2",
+      "display_name": "UFO 2",
+      "source_index": 10,
+      "configuration": "fixed",
+      "part_families": [],
+      "optional_parts": []
+    }
+  ]
+}

@@ -16,6 +16,153 @@ func _run() -> void:
 	root.add_child(scene)
 	await process_frame
 
+	var configuration_menu := scene.get_node_or_null(
+		"ConfigurationMenu"
+	) as FlightConfigurationMenu
+	if configuration_menu == null:
+		push_error("Smoke test could not find the flight configuration menu.")
+		quit(1)
+		return
+	if (
+		configuration_menu.selected_aircraft_label() != "test-airplane"
+		or configuration_menu.selected_map_label() != "test-playground"
+	):
+		push_error("Default flight configuration labels changed.")
+		quit(1)
+		return
+	var ground := scene.get_node_or_null("Ground") as StaticBody3D
+	var runway := scene.get_node_or_null("Runway") as MeshInstance3D
+	var ground_collision := scene.get_node_or_null(
+		"Ground/CollisionShape3D"
+	) as CollisionShape3D
+	if (
+		ground == null
+		or runway == null
+		or ground_collision == null
+		or not ground.visible
+		or not runway.visible
+		or ground_collision.disabled
+	):
+		push_error("Testing grounds did not retain its floor and runway.")
+		quit(1)
+		return
+	scene.set_test_environment_enabled(false)
+	if ground.visible or runway.visible or not ground_collision.disabled:
+		push_error("Generated-map environment retained testing-ground nodes.")
+		quit(1)
+		return
+	scene.set_test_environment_enabled(true)
+	if (
+		configuration_menu.aircraft_family_display_name("bf-109")
+		!= "Bf-109"
+		or configuration_menu.stock_parts_label_for_family("bf-109")
+		!= (
+			"Wing 1, Tail 1, Engine 1, Body 1, Canopy 1, "
+			+ "Propeller 1"
+		)
+		or configuration_menu.stock_parts_label_for_family("twin-wing")
+		!= (
+			"Wing 1, Tail 1, Engine 1, Body 1, Canopy 1, "
+			+ "Propeller 1, Tire 1"
+		)
+		or configuration_menu.stock_parts_label_for_family("f-117")
+		!= "Fixed factory configuration"
+	):
+		push_error("Aircraft family or stock-part catalog is invalid.")
+		quit(1)
+		return
+	var property_probe := Node.new()
+	if (
+		not configuration_menu._set_object_property(
+			property_probe,
+			"process_priority",
+			7.0
+		)
+		or property_probe.process_priority != 7
+		or configuration_menu._set_object_property(
+			property_probe,
+			"missing_property",
+			1
+		)
+	):
+		push_error("Configuration component property assignment failed.")
+		quit(1)
+		return
+	for restart_event in InputMap.action_get_events("restart"):
+		if (
+			restart_event is InputEventJoypadButton
+			and restart_event.button_index == JOY_BUTTON_START
+		):
+			push_error("Start is still bound directly to restart.")
+			quit(1)
+			return
+	var has_camera_key := false
+	var has_camera_select := false
+	for camera_event in InputMap.action_get_events("camera_view"):
+		if (
+			camera_event is InputEventKey
+			and camera_event.physical_keycode == KEY_C
+		):
+			has_camera_key = true
+		elif (
+			camera_event is InputEventJoypadButton
+			and camera_event.button_index == JOY_BUTTON_BACK
+		):
+			has_camera_select = true
+	if not has_camera_key or not has_camera_select:
+		push_error("Camera view toggle inputs are incomplete.")
+		quit(1)
+		return
+
+	var open_menu_event := InputEventKey.new()
+	open_menu_event.physical_keycode = KEY_TAB
+	open_menu_event.pressed = true
+	configuration_menu._unhandled_input(open_menu_event)
+	if not paused:
+		push_error("Configuration menu did not pause flight.")
+		quit(1)
+		return
+	var cross_event := InputEventJoypadButton.new()
+	cross_event.button_index = JOY_BUTTON_A
+	cross_event.pressed = true
+	configuration_menu._input(cross_event)
+	var aircraft_selector: OptionButton = configuration_menu.get(
+		"_aircraft_selector"
+	)
+	if not aircraft_selector.get_popup().visible:
+		push_error("Cross did not open the focused aircraft selector.")
+		quit(1)
+		return
+	configuration_menu._on_selector_popup_input(
+		cross_event,
+		aircraft_selector
+	)
+	if aircraft_selector.get_popup().visible:
+		push_error("Cross did not confirm the highlighted aircraft option.")
+		quit(1)
+		return
+	configuration_menu._input(cross_event)
+	if not aircraft_selector.get_popup().visible:
+		push_error("Cross did not reopen the aircraft selector.")
+		quit(1)
+		return
+	var triangle_event := InputEventJoypadButton.new()
+	triangle_event.button_index = JOY_BUTTON_Y
+	triangle_event.pressed = true
+	configuration_menu._on_selector_popup_input(
+		triangle_event,
+		aircraft_selector
+	)
+	if not paused or aircraft_selector.get_popup().visible:
+		push_error("Triangle did not back out of the aircraft selector.")
+		quit(1)
+		return
+	configuration_menu._input(triangle_event)
+	if paused:
+		push_error("Triangle did not close the configuration menu.")
+		quit(1)
+		return
+
 	var aircraft := scene.get_node_or_null("PlayerAircraft") as PrototypeAircraft
 	if aircraft == null:
 		push_error("Smoke test could not find PlayerAircraft.")
@@ -127,6 +274,50 @@ func _run() -> void:
 	var camera_rig := scene.get_node_or_null("CameraRig") as Node3D
 	if camera_rig == null:
 		push_error("Smoke test could not find CameraRig.")
+		quit(1)
+		return
+	var camera_offset: Vector3 = camera_rig.get("fixed_world_offset")
+	var camera_rotation: Vector3 = camera_rig.get("fixed_rotation_degrees")
+	if not camera_offset.is_equal_approx(Vector3(14.0, 5.0, 0.0)):
+		push_error("Default camera is not positioned for the left-facing view.")
+		quit(1)
+		return
+	if not camera_rotation.is_equal_approx(Vector3(-14.0, 90.0, 0.0)):
+		push_error("Default camera is not rotated 90 degrees left.")
+		quit(1)
+		return
+	if int(camera_rig.get("view_mode")) != 0:
+		push_error("Fixed left camera is not the default view mode.")
+		quit(1)
+		return
+	camera_rig.call("toggle_view_mode")
+	if int(camera_rig.get("view_mode")) != 1:
+		push_error("Camera did not switch to third-person chase mode.")
+		quit(1)
+		return
+	var chase_offset: Vector3 = camera_rig.get("chase_local_offset")
+	var expected_chase_position := aircraft.global_transform * chase_offset
+	if not camera_rig.global_position.is_equal_approx(
+		expected_chase_position
+	):
+		push_error("Third-person camera did not follow the aircraft transform.")
+		quit(1)
+		return
+	var chase_look_offset: Vector3 = camera_rig.get(
+		"chase_local_look_offset"
+	)
+	var expected_chase_forward := (
+		aircraft.global_position
+		+ aircraft.global_basis * chase_look_offset
+		- camera_rig.global_position
+	).normalized()
+	if (-camera_rig.global_basis.z).dot(expected_chase_forward) < 0.999:
+		push_error("Third-person camera did not look toward the aircraft.")
+		quit(1)
+		return
+	camera_rig.call("toggle_view_mode")
+	if int(camera_rig.get("view_mode")) != 0:
+		push_error("Camera did not return to the fixed left view.")
 		quit(1)
 		return
 

@@ -1,6 +1,20 @@
 extends Node3D
 
 
+func set_test_environment_enabled(enabled: bool) -> void:
+	var ground := get_node_or_null("Ground") as StaticBody3D
+	var runway := get_node_or_null("Runway") as MeshInstance3D
+	if ground != null:
+		ground.visible = enabled
+		var collision := ground.get_node_or_null(
+			"CollisionShape3D"
+		) as CollisionShape3D
+		if collision != null:
+			collision.disabled = not enabled
+	if runway != null:
+		runway.visible = enabled
+
+
 func _enter_tree() -> void:
 	_add_key_action("pitch_up", KEY_W)
 	_add_key_action("pitch_down", KEY_S)
@@ -13,6 +27,7 @@ func _enter_tree() -> void:
 	_add_key_action("throttle_up", KEY_R)
 	_add_key_action("throttle_down", KEY_F)
 	_add_key_action("restart", KEY_ENTER)
+	_add_key_action("camera_view", KEY_C)
 
 	# Standard SDL/Godot layout used by most PS2-to-USB adapters.
 	# Pulling the left stick down pitches up, matching aircraft controls.
@@ -26,7 +41,7 @@ func _enter_tree() -> void:
 	_add_joy_axis_action("yaw_left", JOY_AXIS_TRIGGER_RIGHT, 1.0)
 	_add_joy_button_action("throttle_down", JOY_BUTTON_LEFT_SHOULDER)
 	_add_joy_button_action("throttle_up", JOY_BUTTON_RIGHT_SHOULDER)
-	_add_joy_button_action("restart", JOY_BUTTON_START)
+	_add_joy_button_action("camera_view", JOY_BUTTON_BACK)
 
 
 func _unhandled_input(event: InputEvent) -> void:

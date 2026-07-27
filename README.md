@@ -35,6 +35,7 @@ From PowerShell:
 | Yaw | Q / E or Left / Right Arrow |
 | Throttle | R / F |
 | Restart | Enter |
+| Select aircraft and map | Tab |
 
 Hold `R` to increase throttle. Near 30 m/s, use `W` gently to pitch upward.
 
@@ -47,7 +48,31 @@ The prototype uses Godot's standard gamepad layout:
 | Pitch and roll | Left analog stick |
 | Yaw | Right stick horizontal; L2 right / R2 left |
 | Throttle down/up | L1 / R1 |
-| Restart | Start |
+| Toggle camera view | Select |
+| Open/launch configuration | Start |
+| Select / confirm | Cross |
+| Back / deselect | Triangle |
+
+The configuration menu pauses flight. Use the D-pad and Cross to choose an
+aircraft and map, then press Start to launch the current selection. You can also
+highlight **Play / Restart** and press Cross. Triangle closes a list, restores
+an unsaved choice, or moves back. The built-in configuration is `test-airplane`
+on `test-playground`; ignored local experiments can add options without being
+required by a clean checkout.
+
+### Aircraft families
+
+`game/data/aircraft_families.json` records the eleven supported aircraft
+families and their configuration types. Bf-109, Twin Wing, and Pulse Jet expose
+Wing, Tail, Engine, Body, Canopy, and Propeller families; Twin Wing also has a
+required Tire family. Their stock loadout selects variant 1 in each required
+family and leaves optional floats and boosters disabled. The remaining aircraft
+use fixed factory configurations.
+
+Local aircraft configuration files can provide an `aircraft_family_id`. The
+configuration menu then uses the catalog's aircraft name and displays its stock
+parts. The catalog contains metadata only; extracted models and other original
+game content remain outside version control.
 
 Pull the left stick down to pitch upward. The HUD displays the controller name
 that Godot detects. Some unbranded PS2-to-USB adapters expose nonstandard button
@@ -60,10 +85,11 @@ numbers; run the controller probe below if the mapping does not respond.
 
 ### Camera
 
-The camera follows the aircraft's position using a constant world-space offset.
-Its viewing rotation stays completely fixed: aircraft pitch, roll, yaw, and
-direction do not rotate it. The offset, rotation, and position smoothing remain
-editable on the `CameraRig` node.
+Press controller Select or keyboard `C` to switch camera modes. The default
+fixed-left mode follows the aircraft's position with a constant world-space
+offset and rotation. Third-person chase mode places the camera behind and above
+the aircraft using its full transform, then looks back toward it. Both offsets
+and position smoothing remain editable on the `CameraRig` node.
 
 ## Verify
 

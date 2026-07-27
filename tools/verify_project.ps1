@@ -24,13 +24,27 @@ if ($missingFiles) {
     exit 1
 }
 
-$forbiddenFiles = Get-ChildItem -LiteralPath $projectRoot -Recurse -File |
-    Where-Object {
-        $_.FullName -notmatch "[\\/]\.godot[\\/]" -and
-        $_.Extension -in @(".iso", ".bin", ".chd", ".elf", ".irx")
+$git = Get-Command "git" -ErrorAction SilentlyContinue
+if ($git) {
+    $trackedPaths = & $git.Source -c "safe.directory=$projectRoot" -C $projectRoot ls-files
+    if ($LASTEXITCODE -ne 0) {
+        Write-Error "Could not inspect tracked files with Git."
+        exit $LASTEXITCODE
     }
+    $forbiddenFiles = $trackedPaths |
+        ForEach-Object { Get-Item -LiteralPath (Join-Path $projectRoot $_) } |
+        Where-Object {
+            $_.Extension -in @(".iso", ".bin", ".chd", ".elf", ".irx")
+        }
+} else {
+    $forbiddenFiles = Get-ChildItem -LiteralPath $projectRoot -Recurse -File |
+        Where-Object {
+            $_.FullName -notmatch "[\\/]\.godot[\\/]" -and
+            $_.Extension -in @(".iso", ".bin", ".chd", ".elf", ".irx")
+        }
+}
 if ($forbiddenFiles) {
-    Write-Error ("Forbidden original-game files found:`n" + ($forbiddenFiles.FullName -join "`n"))
+    Write-Error ("Forbidden tracked original-game files found:`n" + ($forbiddenFiles.FullName -join "`n"))
     exit 1
 }
 
@@ -40,16 +54,30 @@ if (-not $godot) {
     exit 0
 }
 
-& $godot.Source --headless --editor --path $gameRoot --quit
-if ($LASTEXITCODE -ne 0) {
+$editorOutput = & $godot.Source --headless --editor --path $gameRoot --quit 2>&1
+$editorExitCode = $LASTEXITCODE
+$editorOutput | ForEach-Object { Write-Output $_.ToString() }
+$editorText = $editorOutput -join [Environment]::NewLine
+if (
+    $editorExitCode -ne 0 -or
+    $editorText -match "SCRIPT ERROR:" -or
+    $editorText -match "Failed to load script"
+) {
     Write-Error "Godot import/parser verification failed."
-    exit $LASTEXITCODE
+    exit $(if ($editorExitCode -ne 0) { $editorExitCode } else { 1 })
 }
 
-& $godot.Source --headless --path $gameRoot --script "res://tests/smoke_test.gd"
-if ($LASTEXITCODE -ne 0) {
+$smokeOutput = & $godot.Source --headless --path $gameRoot --script "res://tests/smoke_test.gd" 2>&1
+$smokeExitCode = $LASTEXITCODE
+$smokeOutput | ForEach-Object { Write-Output $_.ToString() }
+$smokeText = $smokeOutput -join [Environment]::NewLine
+if (
+    $smokeExitCode -ne 0 -or
+    $smokeText -match "SCRIPT ERROR:" -or
+    $smokeText -match "Failed to load script"
+) {
     Write-Error "Godot physics smoke test failed."
-    exit $LASTEXITCODE
+    exit $(if ($smokeExitCode -ne 0) { $smokeExitCode } else { 1 })
 }
 
 Write-Output "Static checks, Godot import/parser verification, and physics smoke test passed."
