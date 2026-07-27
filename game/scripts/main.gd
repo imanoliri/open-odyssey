@@ -27,6 +27,7 @@ func _enter_tree() -> void:
 	_add_key_action("throttle_up", KEY_R)
 	_add_key_action("throttle_down", KEY_F)
 	_add_key_action("restart", KEY_ENTER)
+	_add_key_action("camera_view", KEY_C)
 
 	# Standard SDL/Godot layout used by most PS2-to-USB adapters.
 	# Pulling the left stick down pitches up, matching aircraft controls.
@@ -40,6 +41,7 @@ func _enter_tree() -> void:
 	_add_joy_axis_action("yaw_left", JOY_AXIS_TRIGGER_RIGHT, 1.0)
 	_add_joy_button_action("throttle_down", JOY_BUTTON_LEFT_SHOULDER)
 	_add_joy_button_action("throttle_up", JOY_BUTTON_RIGHT_SHOULDER)
+	_add_joy_button_action("camera_view", JOY_BUTTON_BACK)
 
 
 func _unhandled_input(event: InputEvent) -> void:

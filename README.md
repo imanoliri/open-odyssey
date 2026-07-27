@@ -48,6 +48,7 @@ The prototype uses Godot's standard gamepad layout:
 | Pitch and roll | Left analog stick |
 | Yaw | Right stick horizontal; L2 right / R2 left |
 | Throttle down/up | L1 / R1 |
+| Toggle camera view | Select |
 | Open/launch configuration | Start |
 | Select / confirm | Cross |
 | Back / deselect | Triangle |
@@ -84,10 +85,11 @@ numbers; run the controller probe below if the mapping does not respond.
 
 ### Camera
 
-The camera follows the aircraft's position using a constant world-space offset.
-Its viewing rotation stays completely fixed: aircraft pitch, roll, yaw, and
-direction do not rotate it. The offset, rotation, and position smoothing remain
-editable on the `CameraRig` node.
+Press controller Select or keyboard `C` to switch camera modes. The default
+fixed-left mode follows the aircraft's position with a constant world-space
+offset and rotation. Third-person chase mode places the camera behind and above
+the aircraft using its full transform, then looks back toward it. Both offsets
+and position smoothing remain editable on the `CameraRig` node.
 
 ## Verify
 

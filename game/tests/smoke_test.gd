@@ -96,6 +96,23 @@ func _run() -> void:
 			push_error("Start is still bound directly to restart.")
 			quit(1)
 			return
+	var has_camera_key := false
+	var has_camera_select := false
+	for camera_event in InputMap.action_get_events("camera_view"):
+		if (
+			camera_event is InputEventKey
+			and camera_event.physical_keycode == KEY_C
+		):
+			has_camera_key = true
+		elif (
+			camera_event is InputEventJoypadButton
+			and camera_event.button_index == JOY_BUTTON_BACK
+		):
+			has_camera_select = true
+	if not has_camera_key or not has_camera_select:
+		push_error("Camera view toggle inputs are incomplete.")
+		quit(1)
+		return
 
 	var open_menu_event := InputEventKey.new()
 	open_menu_event.physical_keycode = KEY_TAB
@@ -267,6 +284,40 @@ func _run() -> void:
 		return
 	if not camera_rotation.is_equal_approx(Vector3(-14.0, 90.0, 0.0)):
 		push_error("Default camera is not rotated 90 degrees left.")
+		quit(1)
+		return
+	if int(camera_rig.get("view_mode")) != 0:
+		push_error("Fixed left camera is not the default view mode.")
+		quit(1)
+		return
+	camera_rig.call("toggle_view_mode")
+	if int(camera_rig.get("view_mode")) != 1:
+		push_error("Camera did not switch to third-person chase mode.")
+		quit(1)
+		return
+	var chase_offset: Vector3 = camera_rig.get("chase_local_offset")
+	var expected_chase_position := aircraft.global_transform * chase_offset
+	if not camera_rig.global_position.is_equal_approx(
+		expected_chase_position
+	):
+		push_error("Third-person camera did not follow the aircraft transform.")
+		quit(1)
+		return
+	var chase_look_offset: Vector3 = camera_rig.get(
+		"chase_local_look_offset"
+	)
+	var expected_chase_forward := (
+		aircraft.global_position
+		+ aircraft.global_basis * chase_look_offset
+		- camera_rig.global_position
+	).normalized()
+	if (-camera_rig.global_basis.z).dot(expected_chase_forward) < 0.999:
+		push_error("Third-person camera did not look toward the aircraft.")
+		quit(1)
+		return
+	camera_rig.call("toggle_view_mode")
+	if int(camera_rig.get("view_mode")) != 0:
+		push_error("Camera did not return to the fixed left view.")
 		quit(1)
 		return
 
