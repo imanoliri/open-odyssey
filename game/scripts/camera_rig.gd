@@ -1,8 +1,8 @@
 extends Node3D
 
 @export var target_path: NodePath
-@export var fixed_world_offset := Vector3(0.0, 5.0, 14.0)
-@export var fixed_rotation_degrees := Vector3(-14.0, 0.0, 0.0)
+@export var fixed_world_offset := Vector3(14.0, 5.0, 0.0)
+@export var fixed_rotation_degrees := Vector3(-14.0, 90.0, 0.0)
 @export var position_smoothing := 4.0
 
 var target: Node3D

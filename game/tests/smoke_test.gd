@@ -259,6 +259,16 @@ func _run() -> void:
 		push_error("Smoke test could not find CameraRig.")
 		quit(1)
 		return
+	var camera_offset: Vector3 = camera_rig.get("fixed_world_offset")
+	var camera_rotation: Vector3 = camera_rig.get("fixed_rotation_degrees")
+	if not camera_offset.is_equal_approx(Vector3(14.0, 5.0, 0.0)):
+		push_error("Default camera is not positioned for the left-facing view.")
+		quit(1)
+		return
+	if not camera_rotation.is_equal_approx(Vector3(-14.0, 90.0, 0.0)):
+		push_error("Default camera is not rotated 90 degrees left.")
+		quit(1)
+		return
 
 	var starting_position := aircraft.global_position
 	var camera_starting_position := camera_rig.global_position
